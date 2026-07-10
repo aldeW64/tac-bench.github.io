@@ -1,0 +1,794 @@
+\documentclass{article}
+
+\usepackage{corl_2026} % Use this for the initial submission.
+% \usepackage[final]{corl_2026} % Uncomment for the camera-ready ``final'' version.
+% \usepackage[preprint]{corl_2026} % Uncomment for pre-prints (e.g., arxiv); This is like ``final'', but will remove the CORL footnote.
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{xcolor}
+\usepackage{threeparttable}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\graphicspath{{figures/}}
+
+\usepackage{multirow}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+
+\title{Tac-Bench: Benchmarking Diverse Tactile Manipulation and Multimodal World Models}
+
+% NOTE: authors will be visible only in the camera-ready and preprint versions (i.e., when using the option 'final' or 'preprint').
+% 	For the initial submission the authors will be anonymized.
+
+\author{
+  Anonymous Authors\\
+  Anonymous Institution\\
+  \texttt{anonymous@example.com} \\
+}
+
+\newcommand{\weihan}[1]{\textcolor{purple}{\textbf{weihan}: #1}}
+
+
+\begin{document}
+\maketitle
+
+%===============================================================================
+
+\begin{abstract}
+    % Contact-rich manipulation depends on touch: robots must modulate grip force, sense compliance, and guide insertions through occlusions that defeat vision alone. \weihan{motivations not clear. why do you need visuotactile for robot learning? one sentence to start.}
+    Contact-rich manipulation requires information that cameras often cannot provide: contact location, force, compliance, and in-hand object state are local, intermittent, and frequently hidden by occlusion. Tactile sensing can expose these physical interactions, but progress in visuotactile robot learning remains hard to measure as prior evaluations often vary tasks, sensors, learning architectures, and metrics simultaneously. We present \textbf{Tac-Bench}, a simulation benchmark for controlled and reproducible evaluation of tactile manipulation and multimodal world models. Tac-Bench combines a diverse set of contact-rich manipulation environments, multiple tactile sensors, expert demonstrations, policy baselines, and world-model evaluation protocols. For policy learning, Tac-Bench benchmarks different multimodal fusion strategies under controlled conditions. For world-model learning, Tac-Bench evaluates whether imagined dynamics support action decoding, closed-loop execution, and model-predictive optimization. Beyond individual models, Tac-Bench provides thorough benchmarks across task regimes, sensors, and modality ablations, exposing when tactile feedback is essential and where current methods fail. Tac-Bench establishes a unified testbed for measuring, diagnosing, and accelerating progress in multimodal robot learning.
+    % Existing work on vision-touch fusion and visuotactile world models uses incompatible tasks, sensors, and metrics, making progress hard to measure. 
+    % Tac-Bench targets two problems under controlled conditions. First, to study how vision and touch should be fused, we design contact-rich tasks that isolate occlusion, force sensitivity, and in-hand status, then fix the task and data while varying only the fusion architecture. Second, to evaluate physical realism in world models, we move beyond visual fidelity: we decode actions from generated rollouts with a pretrained inverse-dynamics model, and we test whether expert policies can reach goals inside the imagined dynamics. 
+    % Tac-Bench reveals when tactile sensing helps and where current visuotactile models fail, establishing a rigorous, reproducible foundation for multimodal robot learning.\weihan{Remove this, one sentence say the importance of this work}
+\end{abstract}
+
+% Two or three meaningful keywords should be added here
+\keywords{Tactile Manipulation, Visuo-Tactile Policies, World Models, Benchmark}
+
+%===============================================================================
+
+\section{Introduction}
+
+\begin{figure}[t]
+    \centering
+    % \includegraphics[width=\linewidth]{teaser.pdf}
+    \includegraphics[width=\linewidth]{teaser v2.pdf}
+    \caption{\small \textbf{Tac-Bench unifies multimodal policy learning and world-model evaluation on a single simulated platform.} Fourteen contact-rich tasks span pick-and-place, insertion, assembly, classification, visual occlusion, in-hand orientation, and door manipulation, each instantiable with three tactile sensors (GelSight R1.5, GelSight Mini, FlexiTac) on a Franka platform.}
+    \label{fig:teaser}
+% \vspace{-5mm}
+\end{figure}
+
+% Human dexterity is grounded in touch. We modulate grip force to prevent slip, infer object compliance on contact, and guide insertions through occlusions that vision cannot penetrate. Robotic manipulation increasingly aspires to replicate this tactile intelligence. High-resolution visuotactile sensors, such as GelSight~\citep{yuan2017gelsight} and DIGIT~\citep{lambeta2020digit}, have emerged to provide learned control policies with dense, rich contact signals. By fusing these tactile streams with vision and proprioception, recent policy learning frameworks have made significant strides in mastering complex, contact-rich tasks.
+
+Robotic manipulation requires robots to physically interact with objects, tools, and the environment. Vision can guide a robot toward an object, but after contact is made, the critical state often lies at the contact interface. Contact geometry, pressure, slip, compliance, and in-hand object pose are local, transient, and frequently hidden from external cameras. These signals determine whether a robot should tighten its grasp, retreat from a jammed insertion, rotate an object in hand, or continue pushing along a constrained surface. In such regimes, touch is not merely an auxiliary sensing channel; it is a direct measurement of the physical interaction that vision cannot reliably infer.
+% Touch provides a direct measurement of these physical interactions that vision cannot reliably infer. 
+Recent advances in high-resolution tactile sensors~\citep{yuan2017gelsight,lambeta2020digit}, GPU-accelerated tactile simulation~\citep{wang2022tacto,si2022taxim,akinola2024tacsl}, and visuotactile datasets~\citep{higuera2024sparsh,liu2025vtdexmanip,xu2025manifeel} have made tactile robot learning increasingly practical. Research efforts have been made to study how touch improves policies in dexterous, visually degraded, and contact-sensitive tasks~\citep{higuera2024sparsh,liu2025vtdexmanip,xu2025manifeel}, and more recently, multimodal world models have begun to leverage touch for action-conditioned contact prediction~\citep{higuera2026visuo}.
+
+% Recent progress has made tactile robot learning increasingly practical. High-resolution vision-based tactile sensors, such as GelSight~\citep{yuan2017gelsight} and DIGIT~\citep{lambeta2020digit}, provide dense measurements of contact geometry and deformation. Tactile simulation systems, including TACTO~\citep{wang2022tacto}, Taxim~\citep{si2022taxim}, and TacSL~\citep{akinola2024tacsl}, have reduced the cost of generating tactile observations and enabled scalable learning in contact-rich environments. In parallel, tactile representation learning has begun to address sensor-specific perception, while visuotactile manipulation benchmarks and datasets have studied how touch improves policies in dexterous, visually degraded, and contact-sensitive tasks~\citep{higuera2024sparsh,liu2025vtdexmanip,xu2025manifeel}. More recently, multimodal world models have shown that tactile observations can improve action-conditioned predictions of contact dynamics~\citep{higuera2026visuo}. Together, these advances suggest that touch can play a central role in general-purpose robot learning.
+
+% Learning visuotactile policies, however, poses challenges that vision-centric methods evade. Tactile sensing is inherently local and intermittent: a signal appears only on contact, yields information restricted to a minute patch of interaction, and often acts as the \emph{only} informative cue precisely when the object of interest is occluded from the camera. A policy must therefore decide when to trust a sparse tactile stream over a rich but uninformative visual one, and how to fuse the two without letting the dominant visual modality wash out the tactile signal. \weihan{are you trying to investigate why vision-tactile policy learning is difficult here? You need to have one topic sentence for this}
+
+% The same properties that complicate policy learning also make touch difficult to model. While tactile sensing can intuitively prompt the world model to become deeply knowledgeable about real-world physics, capturing this modality presents a steep modeling hurdle. A visuotactile world model must predict a signal that is spatially local, sharply discontinuous at contact onset, and rich in fine-grained texture and force detail---structure that visually-oriented generative metrics neither capture nor penalize when it is wrong. Consequently, a predicted rollout can appear visually plausible while hallucinating non-existent contacts or depicting forces that fundamentally violate physics. \weihan{Same here, You need to have one topic sentence why visual-tactile world model is difficult. probably to combine with last paragraph. Two domiant learning method in this domain include xxx. why they are challenging}
+
+% Progress in this area, however, is hard to measure. Methods are typically evaluated on inconsistent tasks, sensors, and baselines, which obscures genuine progress.\weihan{these two sentences do not sound scientific} Two issues compound the problem. First, visuotactile policies use different fusion strategies, but they are evaluated on different tasks, different sensors, and different assumptions about what the tactile stream provides. It is unclear which architectural choices matter and when, because the architecture is never the only thing that varies. Second, visuotactile world models are typically judged by visual fidelity. Metrics such as the Fr\'{e}chet Video Distance reward visually smooth rollouts that may still violate contact dynamics: phantom contacts, inconsistent forces, impossible motion. Consequently, a model can achieve strong visual scores while producing physically invalid dynamics.
+
+Despite this progress, systematic evaluation remains difficult. Existing studies confound task, sensor, architecture, and metric simultaneously, making it unclear whether gains come from tactile feedback itself or from incidental design choices.
+%Existing studies often vary the task, tactile sensor, observation modality, policy architecture, training data, and metric simultaneously, making it unclear whether gains arise from tactile feedback itself, from a particular fusion strategy, or from task- and sensor-specific design choices. 
+This ambiguity affects both major learning settings. 
+For policies, tactile observations are sparse, local, and informative primarily during contact, so a benchmark must test not only whether touch helps, but also when it is needed and how it should be fused with vision. 
+For world models, contact-rich dynamics require correct contact timing, pressure evolution, and action-conditioned physical consistency, where standard visual fidelity metrics such as FVD~\citep{unterthiner2018fvd} are blind to them: a rollout can score well while hallucinating phantom contacts or impossible forces.
+% visually plausible rollouts are insufficient: contact-rich dynamics require correct contact timing, pressure evolution, and action-conditioned physical consistency. Standard video-generation metrics such as Fréchet Video Distance~\citep{unterthiner2018fvd} measure perceptual similarity, but do not directly test whether imagined dynamics are feasible or useful for downstream control. 
+A benchmark for multimodal robot learning, therefore, needs controlled policy comparisons and physics-aware world-model evaluation.
+
+% \weihan{In order to solve, we present xx. need topic sentences}
+To address these issues, we present \textbf{Tac-Bench}, a unified simulation benchmark for systematic evaluation of multimodal robot learning. Tac-Bench is designed around three benchmarking layers.
+% The benchmark targets the two issues above with two controlled protocols. \emph{For policy fusion,} \weihan{topic sentences? }we provide contact-rich simulation tasks that isolate three failure modes for unimodal vision: occlusion, force sensitivity, and in-hand status requirement. By holding task, data, and unimodal encoders fixed and varying only the fusion module, performance differences are attributable to the architecture itself rather than to incidental task or data choices. \weihan{too detailed, you don't need to say this in introduction} \emph{For physical realism in world models,} \weihan{topic sentences? }we assess functional validity by using the world model to imagine future goal states, decoding the required actions via a pretrained inverse-dynamics model, and executing them in a closed-loop simulation to measure downstream task success. We also assess functional consistency by leveraging the world model in a predictive optimization framework, measuring the reachability gain it provides over an unassisted baseline policy. Together, these probes strictly quantify whether the model's hallucinated dynamics are physically consistent and functionally useful for active downstream control.
+First, it provides a diverse suite of contact-rich manipulation environments with multiple tactile sensing modalities, expert demonstrations, and standardized success criteria. The tasks are chosen to stress conditions where vision alone is insufficient, including occlusion, force-sensitive interaction, and in-hand state estimation.
+Second, Tac-Bench supports controlled policy benchmarking: visual and tactile streams are evaluated under fixed task and data conditions so that fusion strategies can be compared without confounding changes in the environment or dataset.
+Third, Tac-Bench introduces world-model benchmarking for multimodal dynamics, using closed-loop control and reachability-based metrics to test whether imagined rollouts are physically useful for action selection and planning.
+
+Tac-Bench makes three contributions:
+\begin{enumerate}[label=(\arabic*)]
+    \item A simulation suite of 14 contact-rich tasks built on \mbox{TacSL}, covering insertion, assembly, classification, in-hand orientation, and door manipulation, with three tactile sensor types (GelSight R1.5, GelSight Mini, FlexiTac) mounted on a Franka platform.
+    \item A controlled comparison of multimodal policy architectures, isolating fusion strategy from confounding task and data choices, together with the imitation-learning baselines.
+    \item A physical-realism protocol for multimodal world models that directly measures the physical utility through closed-loop rollout success and optimization-based reachability gains.
+\end{enumerate}
+
+% Tac-Bench reveals where tactile sensing is important for contact-rich manipulation and where current multimodal models fail. We open-source the entire platform, including tasks and baselines, to serve as a rigorous foundation for future research in multimodal robot learning.
+
+%===============================================================================
+
+\section{Related Works}
+
+\textbf{Manipulation Benchmarks.}
+General-purpose manipulation benchmarks have driven much of the recent progress in robot learning, from early platforms such as OpenAI Gym~\citep{brockman2016openai}, Meta-World~\citep{yu2020metaworld}, and Robosuite~\citep{zhu2020robosuite} to more recent suites such as ManiSkill~\citep{mu2021maniskill}, RLBench~\citep{james2020rlbench}, BEHAVIOR~\citep{srivastava2022behavior}, and FurnitureBench~\citep{heo2023furniturebench}. None of these expose contact signals to the policy: tactile feedback is either abstracted away or absent. A second line of work targets touch directly. Optical-tactile sensors such as GelSight~\citep{yuan2017gelsight} and DIGIT~\citep{lambeta2020digit} provide dense contact images and underpin most real-world tactile datasets, including YCB-Slide~\citep{suresh2022midastouch}, ManiFeel~\citep{xu2025manifeel}, Tactile MNIST~\citep{schneider2025tactilemnist}, and Sparsh~\citep{higuera2024sparsh}. These efforts are limited by the throughput of physical data collection: hardware wears out, ground-truth contact state is rarely accessible, and the resulting datasets are small. Handheld interfaces such as ViTaMIn~\citep{liu2025vitamin} ease the data-collection bottleneck but still cannot scale to RL training, and partial-simulation efforts like VTDexManip~\citep{liu2025vtdexmanip} cover only narrow task slices. Tac-Bench fills this gap with a fully simulated, contact-rich task suite that delivers ground truth at scale.
+
+\textbf{Tactile Simulation.}
+Accurately simulating contact physics has been a recurring challenge. To avoid the cost of finite-element methods, the community has converged on optical and approximation-based renderers: Taxim~\citep{si2022taxim} uses data-driven look-up tables, TACTO~\citep{wang2022tacto} renders deformation maps with OpenGL, and FOTS~\citep{zhao2024fots} simulates the underlying force tensor for Sim2Real transfer. TacSL~\citep{akinola2024tacsl} and VT-Refine~\citep{huang:corl2025} extend this line with a GPU-accelerated pipeline that parallelizes high-resolution tactile rendering across thousands of environments. Tac-Bench builds on TacSL and uses it as the substrate for a standardized task suite for evaluating closed-loop visuotactile policies and world models.
+
+\textbf{Multimodal Policies and World Models.}
+Two open questions motivate Tac-Bench. The first is fusion: most multimodal policies adopt one of three patterns---early concatenation, late fusion of modality-specific encoders, or cross-modal attention---and a complementary thread, such as Multi-Modal Policy Consensus~\citep{chen2025consensus}, factorizes the policy itself by combining per-modality diffusion experts. Comparisons across these designs are difficult because prior work varies the task, sensor, and training pipeline together with the architecture. Tac-Bench fixes the task, data, and unimodal encoders, and varies only the fusion module. The second question is the evaluation of multimodal world models, which predict future observations conditioned on actions and enable model-based planning and offline RL~\cite{chen2025bimanual, hong2026scoop}. Standard generative metrics such as the Fr\'{e}chet Video Distance~\citep{unterthiner2018fvd} reward distributional similarity to real video and are blind to physical consistency: a rollout can score well on FVD while depicting phantom contacts or force-motion inconsistencies. Tac-Bench addresses this with two physics-aware probes: an inverse-dynamics action-consistency score that flags out-of-distribution decoded actions, and a policy-reachability test that measures whether expert policies retain control inside the imagined dynamics. Table~\ref{tab:comparison} positions Tac-Bench against prior manipulation benchmarks along sensor coverage, task count, and skill breadth. 
+
+\vspace{-1em}
+\begin{table}[h]
+\centering
+\caption{\small Comparison of tactile sensor types and skill coverage across manipulation benchmarks.}
+\label{tab:comparison}
+% \caption{\textbf{Comparison of manipulation benchmarks by task count, tactile sensor coverage, and skill breadth.} Tac-Bench is the only benchmark supporting multiple sensor types simultaneously while covering all seven skill classes.}
+\vspace{0.5em}
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{threeparttable}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l c *{5}{c} *{7}{c} @{}}
+\toprule
+\multirow{2}{*}{\textbf{Benchmark}} 
+& \multirow{2}{*}{\textbf{Tasks}} 
+& \multicolumn{5}{c}{\textbf{Sensor Type}} 
+& \multicolumn{7}{c}{\textbf{Skill Coverage}} \\
+\cmidrule(lr){3-7}\cmidrule(l){8-14}
+& 
+& \textbf{GS} 
+& \textbf{R15} 
+& \textbf{Mini} 
+& \textbf{FlexiTac} 
+& \textbf{FC} 
+& \textbf{PnP} 
+& \textbf{I} 
+& \textbf{A} 
+& \textbf{C} 
+& \textbf{VO} 
+& \textbf{O} 
+& \textbf{DM} \\
+\midrule
+RoboSuite~\citep{zhu2020robosuite}       & 9   & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+RLBench~\citep{james2020rlbench}         & 106 & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+Meta-World~\citep{yu2020metaworld}      & 50  & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+ManiSkill-ViTac~\citep{mu2021maniskill} & 3   & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+DiffRedMax~\citep{xu2022efficient}        & 4   & \xmark & \xmark & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+ManiFeel~\citep{xu2025manifeel}        & 6   & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+TacSL~\citep{akinola2024tacsl}           & 3   & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \cmark & \cmark & \xmark & \xmark & \xmark & \xmark \\
+VT-Refine~\citep{huang:corl2025}       & 1   & \xmark & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark & \xmark & \xmark \\
+\addlinespace[0.2ex]
+\textbf{Tac-Bench (Ours)} 
+& \textbf{14} 
+& \xmark & \cmark & \cmark & \cmark & \xmark 
+& \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+\bottomrule
+\end{tabular*}
+
+\begin{tablenotes}%[flushleft]
+\small
+\item 
+\textbf{Sensor types:} 
+\textbf{GS}: GelSight 2017; 
+\textbf{R15}: GelSight R1.5; 
+\textbf{Mini}: GelSight Mini; 
+\textbf{FlexiTac}: FlexiTac.
+\textbf{Skills:} 
+\textbf{PnP}: Pick \& Place; 
+\textbf{I}: Insertion; 
+\textbf{A}: Assembly; 
+\textbf{C}: Classification; 
+\textbf{VO}: Visual Occlusion; 
+\textbf{O}: In-Hand Orientation; 
+\textbf{DM}: Door Manipulation.
+\end{tablenotes}
+\end{threeparttable}
+
+% \vspace{-5mm}
+\end{table}
+
+% \begin{table}[h]
+% \centering
+% \small
+%     \begin{threeparttable}
+%     \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l c l c l @{}}
+%         \toprule
+%         \textbf{Benchmark} & \shortstack{\textbf{Tactile}\\\textbf{Sensors}} & \textbf{Sensor Types} & \textbf{Tasks} & \textbf{Skills}  \\
+%         \midrule
+%         Robosuite & 0 & N/A & 9 & —  \\
+%         rl-bench & 0 & N/A & 106 & —  \\
+%         MetaWorld & 0 & N/A & 50 & — \\
+%         ManiSkill-ViTac & 1 & GS & 3 & —  \\
+%         DiffHand & 1 & FC & 4 & —  \\
+%         ManiFeel & 1 & R15 & 6 & I, C, A, VO  \\
+%         TacSL & 1 & R15 & 3 & I, A  \\
+%         VT-Refine & 1 & FlexiTac & 1 & I  \\
+%         \textbf{Tac-Bench (Ours)} & 3 & R15, Mini, FlexiTac & 14 & PnP, I, A, C, VO, O, DM  \\
+%         \bottomrule
+%     \end{tabular*}
+    
+%     \begin{tablenotes}[flushleft]
+%         \small
+%         \item
+%         \textbf{GS}: GelSight 2017;
+%         \textbf{R15}: GelSight R1.5;
+%         \textbf{Mini}: GelSight Mini;
+%         \item
+%         \textbf{PnP}: Pick \& Place;
+%         \textbf{I}: Insertion;
+%         \textbf{A}: Assembly;
+%         \textbf{C}: Classification;
+%         \textbf{VO}: Visual Occlusion;
+%         \textbf{O}: In-Hand Orientation;
+%         \textbf{DM}: Door Manipulation.
+%     \end{tablenotes}
+%     \vspace{0.5em}
+%     \caption{Comparison between manipulation benchmarks.}
+%     \label{tab:comparison}
+%     \end{threeparttable}
+% \end{table}
+
+
+
+%===============================================================================
+
+\section{Evaluating Multimodal Policies and World Models}
+
+\subsection{Simulation Platform and Data Collection}
+To enable systematic and reproducible research into visuo-tactile manipulation, we develop a high-fidelity simulation platform built upon a physics engine capable of modeling realistic contact dynamics. The simulator exposes three synchronized sensory streams at each timestep $t$: an RGB visual observation $\mathbf{v}_t \in \mathbb{R}^{H \times W \times 3}$ from one or more workspace cameras, a tactile observation $\boldsymbol{\tau}_t \in \mathbb{R}^{M \times M \times C}$ rendered from a simulated gel-based tactile sensor (e.g., a GelSight-style sensor) mounted on the robot's fingertip, and a proprioceptive state vector $\mathbf{p}_t \in \mathbb{R}^{d}$ comprising joint positions, joint velocities, and end-effector pose.
+
+We construct a task suite of $K$ contact-rich manipulation tasks targeting three conditions where unimodal policies are expected to fail: occlusion-dominant scenarios where the grasped object is hidden during a critical phase, force-critical scenarios such as peg insertion requiring fine force modulation invisible to the camera, and in-hand-status-detection scenarios such as test tube arrangement where tactile feedback is needed for in-hand orientation. For each task, expert demonstrations are collected via a privileged controller with access to full ground-truth state, producing a dataset $\mathcal{D} = \{(\mathbf{v}_t, \boldsymbol{\tau}_t, \mathbf{p}_t, \mathbf{a}_t)\}$ used for imitation learning baselines and world model training.
+
+% We construct a task suite of $K$ contact-rich manipulation tasks spanning a spectrum of sensory demands. Tasks are selected to specifically stress-test conditions where unimodal policies are expected to fail:
+% \begin{enumerate}[label=(\roman*)]
+%     \item \textbf{Occlusion-dominant} scenarios, in which the grasped object is fully hidden from the camera during a critical phase,
+%     \item \textbf{Force-critical} scenarios, such as peg insertion and surface wiping, requiring fine force modulation that is invisible to the camera, and
+%     \item \textbf{In-hand-status-detection} scenarios, such as test tube arrangement, in which we need the tactile feedback to do the in-hand orientation to fulfill the task.
+% \end{enumerate}
+% For each task, expert demonstrations are collected via a privileged controller with access to full ground-truth state, producing a dataset $\mathcal{D} = \{(\mathbf{v}_t, \boldsymbol{\tau}_t, \mathbf{p}_t, \mathbf{a}_t)\}$ used for imitation learning baselines and world model training.
+
+\subsection{Multimodal Policy Architectures}
+
+To isolate the effect of fusion strategy, all policies share identical unimodal encoders: convolutional encoders $f_v(\cdot)$ and $f_\tau(\cdot)$ for visual and tactile observations, and a linear encoder $f_p(\cdot)$ for proprioception, each mapping to a fixed-dimensional embedding $\mathbf{e}_v, \mathbf{e}_\tau, \mathbf{e}_p \in \mathbb{R}^{d}$. We benchmark three fusion architectures (Figure~\ref{fig:architecture}), with full details of the architecture in Appendix~\ref{app:policy-architectures}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/architecture.pdf}
+    % \caption{Visualization for three different policy architectures.}
+    \caption{\small \textbf{Three multimodal fusion architectures benchmarked in Tac-Bench.} \textit{Early Fusion} concatenates all modality embeddings into a shared policy network. \textit{Compositional Policy (CP)}~\citep{chen2025consensus} combines modality-specific diffusion experts via a learned router. \textit{Cross-Modal Attention (CMA, ours)} assigns each modality a dedicated Transformer stream with periodic bidirectional cross-attention gates. All architectures share identical unimodal encoders.}
+    \label{fig:architecture}
+\end{figure}
+
+\paragraph{Early Fusion.}
+All encoded modality features are concatenated immediately after the encoder stage and passed to a shared policy network $\pi_\theta$:
+\begin{equation}
+    \mathbf{z}_t = \bigl[\mathbf{e}_v \;\|\; \mathbf{e}_\tau \;\|\;
+    \mathbf{e}_p\bigr], \quad \mathbf{a}_t = \pi_\theta(\mathbf{z}_t).
+\end{equation}
+Despite its simplicity, this baseline is representative of the dominant approach in prior work. Its key limitation is that the fixed concatenation provides no mechanism for the model to up- or down-weight individual modalities at inference time, making it brittle when one stream is corrupted or occluded.
+
+\paragraph{Multi-Modal Compositional Policy (CP)~\citep{chen2025consensus}.}
+We include the method of \citet{chen2025consensus} as a strong baseline. CP factorizes the policy into modality-specific diffusion models $\{\pi_m\}_{m \in \mathcal{M}}$, combined via a learned router $r_\phi$ producing consensus weights $\mathbf{w}_t \in \Delta^{|\mathcal{M}|-1}$:
+\begin{equation}
+    \mathbf{a}_t = \sum_{m \in \mathcal{M}} w_t^{(m)}\,
+    \pi_m\!\left(\mathbf{a}_t \mid \mathbf{e}_m\right).
+\end{equation}
+This prevents dominant modalities such as vision from overwhelming sparse tactile signals, and supports incremental addition of new modalities without full retraining. It therefore serves as the most competitive late-fusion baseline in our study.
+
+
+% We include the method of \citet{chen2025consensus} as a strong baseline. Rather than fusing features, CP factorizes the policy into a set of modality-specific diffusion models $\{\pi_m\}_{m \in \mathcal{M}}$, each specialized for a single representation (e.g., vision or touch). A learned router network $r_\phi$ produces consensus weights
+% $\mathbf{w}_t \in \Delta^{|\mathcal{M}|-1}$ that adaptively combine the action score estimates from each diffusion model:
+% \begin{equation}
+%     \mathbf{a}_t = \sum_{m \in \mathcal{M}} w_t^{m}\,
+%     \pi_m\!\left(\mathbf{a}_t \mid \mathbf{e}_m\right),
+% \end{equation}
+% where $\Delta^{|\mathcal{M}|-1}$ denotes the probability simplex over modalities. CP explicitly prevents dominant modalities such as vision from overwhelming sparse tactile signals, and supports incremental addition of new modalities without full retraining. It therefore serves as the most competitive late-fusion baseline in our study.
+
+\paragraph{Cross-Modal Attention Fusion (CMA).}
+
+Our proposed architecture uses a \textbf{Mixture of Transformers (MoT)}~\citep{bao2023mot}, assigning each modality a dedicated Transformer stream. At every $S$-th layer, visual tokens attend to tactile keys and values via cross-modal attention:
+\begin{equation}
+    \mathbf{X}_v^{(\ell+1)}
+    = \tilde{\mathbf{X}}_v^{(\ell)}
+    + \mathrm{CrossAttn}\!\left(
+        \mathbf{Q} = \tilde{\mathbf{X}}_v^{(\ell)},\;
+        \mathbf{K} = \tilde{\mathbf{X}}_\tau^{(\ell)},\;
+        \mathbf{V} = \tilde{\mathbf{X}}_\tau^{(\ell)}
+    \right),
+\end{equation}
+with a symmetric gate in the opposite direction. After $L$ layers, pooled representations from all streams are passed to the policy head:
+\begin{equation}
+    \mathbf{z}_t^{\mathrm{MoT}} =
+    \bigl[\mathrm{Pool}(\mathbf{X}_v^{(L)}) \;\|\;
+    \mathrm{Pool}(\mathbf{X}_\tau^{(L)}) \;\|\; \mathbf{e}_p\bigr],
+    \quad \mathbf{a}_t = \pi_\theta\!\left(\mathbf{z}_t^{\mathrm{MoT}}\right).
+\end{equation}
+By injecting cross-modal signals only at periodic layers, CMA avoids modality collapse while retaining flexibility to up-weight tactile information in occlusion-dominant or force-critical scenarios.
+
+% Our proposed architecture is built on a \textbf{Mixture of Transformers (MoT)} design~\citep{bao2023mot}, in which each modality is assigned a
+% dedicated Transformer stream rather than sharing a monolithic backbone. Formally, let $\mathbf{X}_m^{(\ell)} \in \mathbb{R}^{n_m \times d}$ denote the token sequence of modality $m \in \{v, \tau, p\}$ at layer $\ell$. Each stream applies its own self-attention and feed-forward network:
+% \begin{equation}
+%     \tilde{\mathbf{X}}_m^{(\ell)}
+%     = \mathrm{FFN}_m\!\left(\mathrm{SelfAttn}_m\!\left(
+%     \mathbf{X}_m^{(\ell)}\right)\right).
+% \end{equation}
+% At every $S$-th layer, cross-modal attention gates are inserted to allow controlled information exchange between streams. Concretely, visual tokens act as queries against tactile keys and values, capturing contact-relevant features that complement the global visual context:
+% \begin{equation}
+%     \mathbf{X}_v^{(\ell+1)}
+%     = \tilde{\mathbf{X}}_v^{(\ell)}
+%     + \mathrm{CrossAttn}\!\left(
+%         \mathbf{Q} = \tilde{\mathbf{X}}_v^{(\ell)},\;
+%         \mathbf{K} = \tilde{\mathbf{X}}_\tau^{(\ell)},\;
+%         \mathbf{V} = \tilde{\mathbf{X}}_\tau^{(\ell)}
+%     \right).
+% \end{equation}
+% A symmetric gate is applied in the opposite direction so that tactile tokens can also attend to the visual context. After $L$ layers, the final token representations from all streams are pooled and concatenated with the proprioceptive embedding before being passed to the policy head:
+% \begin{equation}
+%     \mathbf{z}_t^{\mathrm{MoT}} =
+%     \bigl[\mathrm{Pool}(\mathbf{X}_v^{(L)}) \;\|\;
+%     \mathrm{Pool}(\mathbf{X}_\tau^{(L)}) \;\|\; \mathbf{e}_p\bigr],
+%     \quad \mathbf{a}_t = \pi_\theta\!\left(\mathbf{z}_t^{\mathrm{MoT}}\right).
+% \end{equation}
+% By keeping modality-specific streams intact while injecting selective cross-modal signals only at periodic layers, CMA avoids the modality collapse observed in early fusion and retains the flexibility to up-weight tactile information in occlusion-dominant or force-critical scenarios.
+ 
+% All policies are trained with behavioral cloning on $\mathcal{D}$ using an
+% $\ell_2$ regression loss on continuous actions, and evaluated using task
+% success rate over $N$ rollouts. A structured ablation, removing individual
+% modality streams and cross-attention gates, further quantifies the marginal contribution of each design choice. \weihan{You don't need to say this under method section. just say what exact benefit each design bring you}
+
+% \subsubsection{Physical Plausibility via Inverse Dynamics Decoding}
+
+% Let $\mathcal{W}$ denote a visuo-tactile world model trained to generate future observation sequences $(\hat{\mathbf{v}}_{t+1}, \hat{\boldsymbol{\tau}}_{t+1})$ given a history of observations. We pre-train an \textbf{inverse dynamics model} (IDM) $\mathcal{I}_\psi$ on real interaction data to estimate the action $\hat{\mathbf{a}}_t$ that was likely taken between two consecutive observation pairs:
+% \begin{equation}
+%     \hat{\mathbf{a}}_t = \mathcal{I}_\psi\!\left(\mathbf{v}_t,\, \boldsymbol{\tau}_t,\, \mathbf{v}_{t+1},\, \boldsymbol{\tau}_{t+1}\right).
+% \end{equation}
+
+% Given an \textbf{unconditioned} trajectory $\hat{\xi} = \{(\hat{\mathbf{v}}_t, \hat{\boldsymbol{\tau}}_t)\}_{t=0}^{T}$ sampled from $\mathcal{W}$, we decode an implied action sequence $\{\hat{\mathbf{a}}_t\}$ using $\mathcal{I}_\psi$. Physical plausibility is quantified by the \textbf{IDM Action Consistency Score (IACS)}, defined as the normalized $\ell_2$ distance between the decoded actions and the distribution of physically valid actions in $\mathcal{D}$. A world model that generates visually smooth but physically incoherent transitions will produce out-of-distribution decoded actions, yielding a high IACS penalty.
+
+\subsection{Multimodal World Model Evaluation Protocol}
+\label{subsec:wm_eval_propocol}
+
+Standard generative metrics, such as Fr\'{e}chet Video Distance (FVD), measure distributional similarity to real video but are blind to physical consistency: a rollout can score well while depicting impossible contact events or violating force-motion relationships. We introduce two physics-aware metrics that directly probe the \emph{physical utility} of a world model.
+
+\subsubsection{Functional Validity via Closed-Loop Rollout Execution}
+\label{method:CLRS}
+
+To evaluate whether the generated sequences translate to effective, goal-directed behavior, we introduce a benchmark assessing \textbf{Closed-Loop Rollout Success (CLRS)}. Given a current visuo-tactile observation pair $(\mathbf{v}_t, \boldsymbol{\tau}_t)$, we leverage the pre-trained world model $\mathcal{W}$ to imagine a future goal state $(\hat{\mathbf{v}}_{g}, \hat{\boldsymbol{\tau}}_{g})$. The pre-trained inverse dynamics model $\mathcal{I}_\psi$ is then utilized as a goal-conditioned policy to decode the immediate action $\hat{\mathbf{a}}_t$ required to reach that generated goal:
+\begin{equation}
+    \hat{\mathbf{a}}_t = \mathcal{I}_\psi\!\left(\mathbf{v}_t,\, \boldsymbol{\tau}_t,\, \hat{\mathbf{v}}_{g},\, \hat{\boldsymbol{\tau}}_{g}\right).
+\end{equation}
+This decoded action is executed directly within the simulation environment to transition the true state. By repeating this process in a closed-loop fashion over a horizon $T$, we measure the task's final \textbf{Success Rate}. CLRS strictly quantifies the functional utility of the world model's generations when deployed for active downstream control.
+
+\subsubsection{Functional Consistency via Optimization-Based Reachability Gain}
+\label{method:R}
+
+\textbf{Reachability Gain ($\mathcal{R}$)} quantifies how much a world model improves policy performance when used as a planning substrate. We first record the unassisted success rate $S_{\text{base}}$ of a pre-trained policy. We then apply model-predictive optimization: at each step, $M{=}16$ candidate action sequences are sampled from the policy and rolled out through the action-conditioned world model $\mathcal{W}^{\text{cond}}$; the sequence whose predicted final frame best matches a goal image $\mathbf{v}^*$ is selected:
+\begin{equation}
+    i^* = \arg\min_{i} \left\| \hat{\mathbf{v}}_{t+H}^{(i)} - \mathbf{v}^* \right\|_2^2,
+\end{equation}
+and its first action is executed. The resulting optimized success rate $S_{\text{opt}}$ yields:
+\begin{equation}
+    \mathcal{R} = S_{\text{opt}} - S_{\text{base}}.
+\end{equation}
+A world model with inaccurate or drifting dynamics will select poor actions, yielding low or negative $\mathcal{R}$; a high score confirms the imagined dynamics are physically grounded enough for planning. Full protocol details are in Appendix~\ref{app:reachability}.
+
+% To determine whether a world model can serve as an effective planning substrate, we must evaluate its capacity to guide trajectory optimization without suffering from compounding dynamical drift. A key challenge is that standard generative metrics fail to capture whether a model's internal gradients are physically accurate enough for multi-step planning. To isolate and quantify this planning utility, we measure the absolute performance gain achieved when a baseline policy is optimized via world-model rollouts versus when it operates entirely unassisted. 
+
+% Our evaluation protocol consists of three sequential steps:
+
+% \textbf{1. Establishing the Unassisted Baseline:} We first measure the baseline capability of the agent without any imagination-based planning. We roll out a pre-trained policy directly within the true environment and record its unassisted success rate, denoted as $S_{\text{base}}$.
+
+% \textbf{2. World-Model-Guided Optimization:} We then introduce a model-predictive optimization framework to evaluate how effectively the world model's predictive capabilities can refine these baseline actions. At each execution step, the pre-trained policy serves as a proposal distribution from which we sample $M=16$ candidate action sequences, $\{\mathbf{a}_{t:t+H}^{(i)}\}_{i=1}^M$, over a planning horizon $H$. Each candidate sequence is rolled out through the action-conditioned world model $\mathcal{W}^{\text{cond}}$ to predict a corresponding final observation $\hat{\mathbf{v}}_{t+H}^{(i)}$. Given a pre-defined target goal image $\mathbf{v}^*$, we evaluate the candidate trajectories by calculating the Mean Squared Error (MSE) between their predicted final states and the goal state. The optimal action sequence is chosen by selecting the sample that minimizes this visual loss:
+% \begin{equation}
+%     i^* = \arg\min_{i} \left\| \hat{\mathbf{v}}_{t+H}^{(i)} - \mathbf{v}^* \right\|_2^2.
+% \end{equation}
+% The first action of the selected sequence, $\mathbf{a}_t^{(i^*)}$, is executed in the true environment. This optimization process is repeated in a closed-loop manner across the entire episode, yielding an optimized success rate $S_{\text{opt}}$.
+
+% \textbf{3. Quantifying Reachability Gain:} Finally, we compute the \textbf{Reachability Gain ($\mathcal{R}$)} to capture the absolute improvement in task success brought by the optimization framework:
+% \begin{equation}
+%     \mathcal{R} = S_{\text{opt}} - S_{\text{base}}.
+% \end{equation}
+
+% Under this formulation, a world model with physically inconsistent or drifting dynamics will provide inaccurate predictions during the planning horizon, leading to sub-optimal action selection and a low or negative reachability gain. Conversely, a high $\mathcal{R}$ score signifies that the world model's imagined dynamics are accurate enough to consistently refine and enhance policy execution.
+
+\paragraph{Unified evaluation.}
+Together, the components above form a unified evaluation framework for both policy architectures and world models. For policy evaluation, we report the success rate broken down by task category. For world model evaluation, we report the standard video quality metrics alongside our proposed CLRS and $\mathcal{R}(\mathcal{W}^{\text{cond}}, \pi^*)$ to provide a complete picture of both visual and physical quality.
+
+% To assess whether the world model functions effectively as a planning substrate, we evaluate the performance gain achieved through world-model-guided trajectory optimization. We first establish a baseline by rolling out a pre-trained policy directly within the true environment and recording its unassisted success rate, denoted as $S_{\text{base}}$.
+% \weihan{This sounds like you are reporting what you did, but it would be better if you can: we have problem A/ we want to get A result, so we do B}
+% We then introduce a model-predictive optimization framework leveraging the predictive capabilities of the world model. At each execution step, the pre-trained policy is treated as a proposal distribution from which we sample $M=16$ candidate action sequences, $\{\mathbf{a}_{t:t+H}^{(i)}\}_{i=1}^M$, over a planning horizon $H$. Each candidate sequence is rolled out through the action-conditioned world model $\mathcal{W}^{\text{cond}}$ to predict a corresponding final observation $\hat{\mathbf{v}}_{t+H}^{(i)}$. Given a pre-defined goal image $\mathbf{v}^*$, we evaluate the candidate trajectories by calculating the Mean Squared Error (MSE) between their predicted final states and the goal state. The optimal action sequence is chosen by selecting the sample that minimizes this visual loss:
+% \begin{equation}
+%     i^* = \arg\min_{i} \left\| \hat{\mathbf{v}}_{t+H}^{(i)} - \mathbf{v}^* \right\|_2^2.
+% \end{equation}
+% The first action of the selected sequence, $\mathbf{a}_t^{(i^*)}$, is executed in the environment. This optimization process is repeated in a closed-loop manner, yielding an optimized success rate $S_{\text{opt}}$.
+
+% We define the \textbf{Reachability Gain ($\mathcal{R}$)} as the absolute improvement in task success rate brought by the optimization framework:
+% \begin{equation}
+%     \mathcal{R} = S_{\text{opt}} - S_{\text{base}}.
+% \end{equation}
+% A world model with physically inconsistent or drifting dynamics will provide inaccurate MSE gradients during planning, leading to sub-optimal action selection and a low or negative reachability gain. Conversely, a high $\mathcal{R}$ score signifies that the world model's imagined dynamics are accurate enough to consistently refine and enhance policy execution.
+
+
+
+%===============================================================================
+
+\section{Tactile Benchmark}
+\label{sec:benchmark}
+
+\vspace{-1.2em}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{task.pdf}
+    \caption{\small \textbf{Overview of Tac-Bench Tasks.} Tac-Bench includes 14 contact-rich tasks grouped into seven skill classes: pick-and-place, insertion, assembly, classification, visual occlusion, in-hand orientation, and door manipulation.}
+    \label{fig:tasks}
+\end{figure}
+
+The 14 tasks span seven skill classes: \emph{pick-and-place} (Stack Cube), \emph{insertion} (Peg, USB, Plug), \emph{assembly} (Screw Nut\,\&\,Bolt, Gears, Bulb), \emph{classification} (Ball Classification), \emph{visual occlusion} (Object Search, Blind Insertion), \emph{in-hand orientation} (Test Tube Arrangement), and \emph{door manipulation} (Sliding, Pulling, Hinge Door Open). Each task is designed so that at least one phase is unsolvable from vision alone, exercising occlusion handling, force modulation, or in-hand state estimation. Per-task descriptions are provided in Appendix~\ref{app:tasks}. Figure~\ref{fig:tasks} shows representative tasks from the suite. Please refer to Appendix~\ref{app:robots-sensors} for more detailed information about the experiment platform and detailed settings.
+
+For each task, we provide: a dataset including expert trajectories, a sparse success criterion, and a privileged expert that generates demonstration data for imitation learning and world-model training. Each task can be instantiated with any of the three tactile sensors from Appendix~\ref{app:robots-sensors}.
+
+
+% \weihan{I don't think this sould be another subsection?}
+% \subsection{Task Suite} 
+
+% \textbf{Pick-and-place.} \emph{Stack Cube} requires lifting and stacking a cube, with grip-force modulation under partial visual occlusion.
+
+% \textbf{Insertion.} \emph{Peg}, \emph{USB}, and \emph{Plug Insertion} require sub-millimeter alignment of a connector into a fixed socket. The connector occludes the contact site once it enters the hole.
+
+% \textbf{Assembly.} \emph{Screw Nut\,\&\,Bolt} requires threading a nut onto a bolt; \emph{Gears Assembly} requires meshing two gears with correct tooth alignment; \emph{Bulb Assembly} requires placing the bulb into the socket.
+
+% \textbf{Classification.} \emph{Ball Classification} requires inferring a hidden object property from tactile interaction alone.
+
+% \textbf{Visual Occlusion.} \emph{Object Search} requires locating an object using tactile feedback alone while vision is occluded. \emph{Blind Insertion} requires searching for the target socket and inserting an object into it with no informative visual input.
+
+% \textbf{In-hand orientation.} \emph{Test Tube Arrangement} requires reorienting a tube in the gripper before placing it.
+
+% \textbf{Door manipulation.} \emph{Sliding Door Open}, \emph{Pulling Door Open}, and \emph{Hinge Door Open} require maintaining contact while pulling or sliding, with the hand-handle interface largely occluded.
+% \weihan{I would recommend to put this to the first paragraph. The first paragraph would be a topic paragraph. Also section a is under appendix, you can say appendix A}
+
+% \subsection{Sensor Variation Protocol}
+
+% To isolate the effect of sensor choice from the effect of fusion architecture, we provide a sensor-swap protocol: the same task, the same expert demonstrations, and the same policy class are run with each of GelSight R1.5, GelSight Mini, and FlexiTac. Results are reported per sensor, allowing direct comparison of optical-tactile and force-based modalities on identical tasks.
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \begin{tabular}{|l|l|l|c|c|c|}
+%         \hline
+%         \textbf{Name} & \textbf{Type} & \textbf{Optical Sensors} & \textbf{Resilience} & \textbf{Env Setup} & \textbf{Reward} \\
+%         \hline
+%         Stack Cube              & Pick\,\&\,Place            & R15 / Mini & \checkmark & \checkmark & \checkmark  \\
+%         Peg Insertion           & Insertion                  & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         USB Insertion           & Insertion                  & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         DSUB Insertion          & Insertion                  & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         RJ45 Insertion          & Insertion                  & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         BNC Insertion           & Insertion                  & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         Screw Nut\,\&\,Bolt     & Assembly                   & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         Assemble Gears          & Assembly                   & R15 / Mini & \checkmark & \checkmark & \checkmark \\
+%         Peg Classification      & Shape Classification       & R15 / Mini & \checkmark & \checkmark &  \\
+%         Ball Classification     & Shape Classification       & R15 / Mini & \checkmark & \checkmark  &  \\
+%         Weight Classification   & Weight Classification      & R15 / Mini &  \checkmark & \checkmark  &  \\
+%         Test Tube Arrangement   & Orientation                & R15 / Mini & \checkmark & \checkmark &  \\
+%         Assembly Kit            & Assembly                   & R15 / Mini & \checkmark & \checkmark &  \\
+%         Sliding Door Open       & Door Manipulation          & R15 / Mini & \checkmark & \checkmark &  \\
+%         Pulling Door Open       & Door Manipulation          & R15 / Mini & \checkmark & \checkmark &  \\
+%         Hinge Door Open         & Door Manipulation          & R15 / Mini & \checkmark & \checkmark &  \\
+%         \hline
+%     \end{tabular}
+%     \caption{Tasks in Tac-Bench. Each task supports the listed optical-tactile sensors (GelSight R1.5 and GelSight Mini) and the resilience-based FlexiTac sensor. A check in the \textbf{Reward} column indicates that the task has tuned RL reward shaping; the remaining tasks are evaluated only with imitation learning.}
+%     \label{tab:tasks}
+% \end{table}
+
+%===============================================================================
+
+\section{Benchmarking Results}
+\label{sec:results}
+
+We report results across two axes: a controlled comparison of multimodal policy architectures and the world-model evaluation protocol. All numbers below are the metric value over 50 evaluation episodes.
+% \subsection{Reinforcement Learning Baselines}
+
+% We benchmark four standard RL algorithms (PPO, SAC, DreamerV3, TD-MPC) on the subset of tasks with tuned reward shaping. All agents receive the same visual, tactile, and proprioceptive observations and an early-fusion encoder.
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \begin{tabular}{|l|c|c|c|c|}
+%         \hline
+%         \textbf{Task} & \textbf{PPO} & \textbf{SAC} & \textbf{DreamerV3} & \textbf{TD-MPC} \\
+%         \hline
+%         Peg Insertion         & --- & --- & --- & --- \\
+%         Screw Nut\,\&\,Bolt   & --- & --- & --- & --- \\
+%         Assemble Gears        & --- & --- & --- & --- \\
+%         % Ball Classification   & --- & --- & --- & --- \\
+%         % Weight Classification & --- & --- & --- & --- \\
+%         \hline
+%     \end{tabular}
+%     \caption{RL baseline success rates ($\uparrow$). Each cell reports the mean over three seeds, evaluated at 1M environment steps.}
+%     \label{tab:rl-baselines}
+% \end{table}
+
+% \subsection{Imitation Learning Baselines}
+
+% For each task we collect 200 expert demonstrations from a privileged controller and train a Diffusion Policy with the early-fusion encoder. We compare against a Transformer policy and the Multi-Modal Policy Consensus (CP) method of~\citet{chen2025consensus}.
+
+\subsection{Multimodal Policy Architectures Evaluations}
+
+\subsubsection{Experiment Setup}
+We collect 200 expert demonstrations per task and train all policies with behavioral cloning ($\ell_2$ loss), holding the dataset and unimodal encoders fixed and varying only the fusion module. We compare \emph{CMA} against a Diffusion Transformer (Early Fusion DiT), a UNet Diffusion Policy (Early Fusion UNet), and \emph{CP}~\citep{chen2025consensus}, evaluated using task success rate over 50 rollouts.
+
+\subsubsection{Evaluation Results}
+
+In general, the diverse results in Table~\ref{tab:fusion-architecture} across our task suite demonstrate that the benefit of tactile feedback is highly non-uniform and deeply task-dependent. This variance strongly underscores that designing advanced multimodal fusion architectures, which are capable of dynamically weighing modal importance, correctly identifying the state, and properly interpreting the cross-modality information, remains a critical and highly valuable direction for future research.
+
+\vspace{-1em}
+\begin{table}[h]
+    \centering
+    \caption{\small Evaluation for \textbf{different policy architectures} with success rate (higher is better). }
+    \vspace{0.5em}
+    % \begin{tabular}{|l|c|c|c|c|}
+    \begin{tabular}{lcccc}
+        \hline
+        \textbf{Task} & \textbf{Early Fusion (DiT)} & \textbf{Early Fusion (Unet)} & \textbf{CP~\citep{chen2025consensus}} & \textbf{CMA (Ours)} \\
+        \hline
+        Peg Insertion   & 0.12 & 0.06 & 0.14 & 0.10 \\
+        Usb Insertion      & 0.22 & 0.06 & 0.08 & 0.08 \\
+        Plug Insertion                    & 0.18 & 0.10 & 0.14 & 0.10 \\
+        Ball Classification                  & 0.66 & 0.74 & 0.82 & 0.68 \\
+        Assemble Gears      & 0.10 & 0.02 & 0.06 & 0.04 \\
+        Assemble Bulb        & 0.04 & 0.04 & 0.02 & 0.06 \\
+        Screw Nut\,\&\,Bolt  & 0.22 & 0.16 & 0.28 & 0.06 \\
+        \hline
+    \end{tabular}
+    \label{tab:fusion-architecture}
+\end{table}
+
+
+% This part has been done in the manifeel project!
+% \subsection{Sensor Comparison}
+
+% We run the same fusion architecture (CMA) and the same training pipeline with each of the three tactile sensors on a fixed task set, isolating the effect of sensor choice.
+
+% \begin{table}[h]
+%     \centering
+%     \small
+%     \begin{tabular}{|l|c|c|c|}
+%         \hline
+%         \textbf{Task} & \textbf{GelSight R1.5} & \textbf{GelSight Mini} & \textbf{FlexiTac} \\
+%         \hline
+%         Peg Insertion       & --- & --- & --- \\
+%         Assemble Gears      & --- & --- & --- \\
+%         Ball Classification & --- & --- & --- \\
+%         Screw Nut\,\&\,Bolt & --- & --- & --- \\
+%         \hline
+%     \end{tabular}
+%     \caption{Sensor comparison. CMA policy, identical training data, varying only the tactile sensor mounted on the robot.}
+%     \label{tab:sensor-comparison}
+% \end{table}
+
+
+% Add two parts here
+% 1. World model with IDM
+%   Multimodal world model:
+%       Peg Insertion: 0.56% 
+% 2. Action-conditioned World model with GPC
+%   Multimodal world model:
+%       Sorting: 0.76% -> 0.92%
+
+\subsection{World Model Evaluation Results}
+
+\subsubsection{Experiment Setup}
+
+We evaluate a Vision-only world model and a Multimodal one with early fusion architecture. For Visual Quality and CLRS, both are built on Wan~2.1~\citep{wan2025wan}, fine-tuned on $\approx$800 videos; the multimodal variant concatenates vision and tactile embeddings before the transformer backbone. For Reachability Gain, we use a GPC-style~\citep{qi2025strengthening} action-conditioned model with cross-attention conditioning, where the multimodal variant concatenates tactile and RGB images channel-wise.
+
+\subsubsection{Evaluation Results}
+
+\textbf{Visual Quality.} Conditioned on the first image and the task description, we rollout the multimodal world model as well as the vision-only baseline to generate the RGB videos. Table~\ref{tab:visual-quality} shows how the introduction of the tactile modality can result in a better video generation quality and a better capability to generate more physically-reasonable videos. By grounding visual features during contact events, the multimodal model suppresses pixel drift and object warping, enabling the synthesis of more physically reasonable and temporally coherent future sequences.
+
+\begin{table}[h]
+    \centering
+    % \begin{tabular}{|l|c|c|c|c|}
+    \caption{\small Evaluation across \textbf{video fidelity} on image quality metrics (FVD, LPIPS, SSIM, PSNR).}
+    \vspace{0.5em}
+    \small
+    \begin{tabular}{lcccc}
+        \hline
+        \textbf{Modality} & \textbf{FVD} $\downarrow$ & \textbf{LPIPS} $\downarrow$ & \textbf{SSIM} $\uparrow$ & \textbf{PSNR} $\uparrow$  \\
+        \hline
+        Visual-only       & 0.14 & 0.1041  & 0.9306 & 22.27 \\
+        Multimodal (Early Fusion)   & 0.05 & 0.0687  & 0.9458 & 23.03 \\
+        % Visuotactile (cross-attn)  & --- & ---  & --- \\
+        \hline
+    \end{tabular}
+    \label{tab:visual-quality}
+\end{table}
+
+\textbf{Closed-Loop Rollout Success.} To evaluate the functional validity and physical plausibility of the generated visuo-tactile sequences, we instantiate the CLRS evaluation protocol defined in Sec.~\ref{method:CLRS}. The quantitative results across our evaluation suite are compiled in Table~\ref{tab:close-loop-success-rate}. As demonstrated, the multimodal framework generally achieves a higher success rate across tasks, indicating that the imagined future visuo-tactile observations serve as more coherent, physically reachable targets for the inverse dynamics policy.
+
+\vspace{-1em}
+\begin{table}[h]
+    \centering
+    % \setlength{\tabcolsep}{8pt} % Slightly increased padding for readability now that it's narrower
+    % \begin{tabular}{|l|c|c|c|c|c|}
+    \caption{\small \textbf{Close-loop rollout success rate on downstream tasks.} Shows the physical plausibility of the generated visual signals.}
+    \vspace{0.5em}
+    \small
+    \begin{tabular}{lccccc}
+        \hline
+        \textbf{Modality} & \textbf{Peg Insertion} & \textbf{USB Insertion} & \textbf{Plug Insertion} & \textbf{Gear Assembly} & \textbf{Bulb Assembly} \\
+        \hline
+        % Visual-only baseline       & 0.49 & 0.22 & 0.06 & 0.67 & 0.00  \\
+        Visual-only       & 0.49 & 0.22 & 0.06 & 0.67 & 0.00  \\
+        % Visuotactile (concat)      & 0.58 & 0.27 & 0.04 & 0.77 & 0.00  \\
+        Multimodal   & 0.58 & 0.27 & 0.04 & 0.77 & 0.00  \\
+        % Visuotactile (cross-attn)  & ---  & ---  & ---  & ---  \\
+        \hline
+    \end{tabular}
+    \label{tab:close-loop-success-rate}
+\end{table}
+
+\textbf{Policy Reachability Rate.} To assess the utility of the world model as an accurate planning substrate, we evaluate the performance lift achieved through model-predictive trajectory optimization, as formulated in Sec.~\ref{method:R}. The empirical results comparing the unassisted baseline success ($S_{\text{base}}$) against the world-model-optimized success ($S_{\text{opt}}$) are presented in Table~\ref{tab:reachability-evaluation}.
+
+The resulting Reachability Gain serves as a direct signal for the consistency of the action-conditioned dynamics model. Overall, the results show that while visual dynamics excel in spatial positioning, the integration of tactile data is still essential to prevent planning drift during complex physical interactions.
+
+\vspace{-1em}
+\begin{table}[h]
+    \centering
+    % \setlength{\tabcolsep}{14pt} % Adjusted padding for clean layout with 3 task columns
+    % \begin{tabular}{|l|c|c|c|c|}
+    \caption{\small \textbf{Policy reachability rate gain $\mathcal{R}$ Evaluation.} Quantify how the models help model-predictive optimization. Higher is better.}
+    \vspace{0.5em}
+    \small
+    \begin{tabular}{lcccc}
+        \hline
+        \textbf{Modality} & \textbf{Sorting} & \textbf{Peg Insertion} & \textbf{Bulb Assembly} & \textbf{USB Insertion} \\
+        \hline
+        % Visual-only baseline       & 14 & 18 & 6 & --- \\
+        Visual-only       & 14 & 18 & 6 & 20 \\
+        % Visuotactile (concat)      & 16 & 14 & 12 & --- \\
+        Multimodal      & 16 & 14 & 12 & 12 \\
+        % Visuotactile (cross-attn)  & --- & --- & --- & --- \\
+        \hline
+    \end{tabular}
+    \label{tab:reachability-evaluation}
+\end{table}
+
+The evaluation metrics across CLRS and Reachability Gain expose exactly how physical grounding translates to downstream utility, confirming that imagined visuo-tactile dynamics effectively support action decoding, closed-loop execution, and model-predictive optimization. While vision-only models often hallucinate physically impossible rollouts that degrade planning, incorporating tactile feedback forces the latent space to respect real contact mechanics. This prevents compounding dynamical drift and ensures imagined targets are physically reachable, proving multimodal world models are indispensable for robust, closed-loop control.
+
+%===============================================================================
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+In this work, we presented Tac-Bench, a comprehensive simulation benchmark for controlled evaluation of tactile manipulation and multimodal world models, benchmarked different policy architectures to fusion multimodal data, and introduced two functional probes, Closed-Loop Rollout Success (CLRS) and Reachability Gain ($\mathcal{R}$), that directly measure physical utility beyond visual fidelity. Our evaluations show that tactile benefit is task-dependent: touch yields clear gains in classification and occlusion tasks while precision insertion remains hard for all architectures, and no single fusion strategy dominates across regimes. For world models, multimodal grounding consistently improves visual quality and CLRS, though Reachability Gain is mixed depending on whether the task is contact- or spatially-dominated.
+
+These results confirm that tactile sensing is indispensable yet localized to phases of high contact uncertainty. The best multimodal fusion strategy remains an open question, and more deeply integrating tactile data into world models for improved physical reasoning is a promising direction for future work.
+
+
+%===============================================================================
+
+\clearpage
+% The acknowledgments are automatically included only in the final and preprint versions of the paper.
+\acknowledgments{If a paper is accepted, the final camera-ready version will (and probably should) include acknowledgments. All acknowledgments go at the end of the paper, including thanks to reviewers who gave useful comments, to colleagues who contributed to the ideas, and to funding agencies and corporate sponsors that provided financial support.}
+
+%===============================================================================
+
+% no \bibliographystyle is required, since the corl style is automatically used.
+\bibliography{example}  % .bib
+
+\appendix
+\section{Simulated Robots and Tactile Sensors}
+\label{app:robots-sensors}
+
+% We describe the embodied platforms, sensors, observation and action spaces, and the rendering pipeline used to produce tactile signals.
+
+\subsection{Robot Platforms}
+
+All tasks in the current suite run on the \textbf{Franka Panda}, a 7-DoF arm with a parallel-jaw gripper. We control the arm with an operational-space impedance controller exposing $(\Delta x, \Delta y, \Delta z, \Delta r_x, \Delta r_y, \Delta r_z)$ Cartesian deltas, and the gripper through a binary open/close command. The platform layer also supports the \textbf{ALOHA} bimanual setup~\citep{aloha2023}---two 6-DoF arms with parallel-jaw grippers under joint-space PD control---as infrastructure for future bimanual extensions, though all tasks reported in this paper are single-arm.
+
+\subsection{Tactile Sensors}
+
+Three tactile sensors are simulated, covering both optical and force-based families.
+\begin{itemize}
+    \item \textbf{GelSight R1.5} (R15). High-resolution optical-tactile sensor with a thick elastomer gel. We render a $320\times240\times3$ RGB image of the deformed gel surface per finger.
+    \item \textbf{GelSight Mini}. Compact optical-tactile sensor with a smaller contact patch. Rendered at $320\times240\times3$.
+    \item \textbf{FlexiTac}. Resilience-based piezoresistive array. Each finger exposes a $C \times C$ pressure map sampled from the contact patch.
+\end{itemize}
+All three sensors share a common interface so that the same task can be run with any sensor by changing a single configuration field.
+
+\subsection{Observation and Action Spaces}
+
+At each timestep $t$, the simulator returns
+\begin{align*}
+    \mathbf{v}_t &\in \mathbb{R}^{H \times W \times 3}      && \text{(workspace RGB camera)} \\
+    \boldsymbol{\tau}_t &\in \mathbb{R}^{M \times M \times C} && \text{(tactile observation, per finger)} \\
+    \mathbf{p}_t &\in \mathbb{R}^{d}                          && \text{(joint positions, velocities, end-effector pose)}
+\end{align*}
+where $(H, W) = (224, 224)$ for the workspace camera and $(M, C)$ depends on the sensor. The action space matches the chosen controller above. Episode length and success criteria are task-specific (Section~\ref{sec:benchmark}).
+
+\subsection{Tactile Rendering Pipeline}
+
+The tactile simulation pipeline generates the tactile signal in two sequential stages. First, a signed-distance-function (SDF) query between the indenter mesh and the gel surface yields per-pixel penetration depths and surface normals. Second, a Taxim-style data-driven renderer~\citep{si2022taxim} maps these geometric quantities to the appearance of each sensor, including illumination and elastomer-specific marker fields for the GelSight variants and a calibrated pressure response for FlexiTac. The pipeline runs on the GPU in parallel across environments, following TacSL~\citep{akinola2024tacsl}, which lets the benchmark scale to thousands of parallel rollouts for RL.
+
+\section{Task Descriptions}
+\label{app:tasks}
+ 
+\textbf{Pick-and-place.} \emph{Stack Cube} requires lifting and stacking a cube, with grip-force modulation under partial visual occlusion.
+ 
+\textbf{Insertion.} \emph{Peg}, \emph{USB}, and \emph{Plug Insertion} require sub-millimeter alignment of a connector into a fixed socket. The connector occludes the contact site once it enters the hole.
+ 
+\textbf{Assembly.} \emph{Screw Nut\,\&\,Bolt} requires threading a nut onto a bolt; \emph{Gears Assembly} requires meshing two gears with correct tooth alignment; \emph{Bulb Assembly} requires placing the bulb into the socket.
+ 
+\textbf{Classification.} \emph{Ball Classification} requires inferring a hidden object property from tactile interaction alone.
+ 
+\textbf{Visual Occlusion.} \emph{Object Search} requires locating an object using tactile feedback alone while vision is occluded. \emph{Blind Insertion} requires searching for the target socket and inserting an object into it with no informative visual input.
+ 
+\textbf{In-hand orientation.} \emph{Test Tube Arrangement} requires reorienting a tube in the gripper before placing it.
+ 
+\textbf{Door manipulation.} \emph{Sliding Door Open}, \emph{Pulling Door Open}, and \emph{Hinge Door Open} require maintaining contact while pulling or sliding, with the hand-handle interface largely occluded.
+
+
+\section{Multimodal Policy Architecture Details}
+\label{app:policy-architectures}
+ 
+All policies share identical unimodal encoders: a convolutional encoder $f_v(\cdot)$ for visual observations, a convolutional encoder $f_\tau(\cdot)$ for tactile observations, and a linear encoder $f_p(\cdot)$ for proprioception, each mapping to a fixed-dimensional embedding $\mathbf{e}_v, \mathbf{e}_\tau, \mathbf{e}_p \in \mathbb{R}^{d}$.
+ 
+\paragraph{Early Fusion.}
+All modality embeddings are concatenated and passed to a shared policy network $\pi_\theta$:
+\begin{equation}
+    \mathbf{z}_t = \bigl[\mathbf{e}_v \;\|\; \mathbf{e}_\tau \;\|\;
+    \mathbf{e}_p\bigr], \quad \mathbf{a}_t = \pi_\theta(\mathbf{z}_t).
+\end{equation}
+This baseline is representative of the dominant approach in prior work. Its key limitation is that fixed concatenation provides no mechanism to up- or down-weight individual modalities at inference time, making it brittle when one stream is uninformative or occluded.
+ 
+\paragraph{Multi-Modal Compositional Policy (CP)~\citep{chen2025consensus}.}
+CP factorizes the policy into modality-specific diffusion models $\{\pi_m\}_{m \in \mathcal{M}}$, each specialized for a single modality. A learned router network $r_\phi$ produces consensus weights $\mathbf{w}_t \in \Delta^{|\mathcal{M}|-1}$ that adaptively combine the action score estimates:
+\begin{equation}
+    \mathbf{a}_t = \sum_{m \in \mathcal{M}} w_t^{(m)}\,
+    \pi_m\!\left(\mathbf{a}_t \mid \mathbf{e}_m\right),
+\end{equation}
+where $\Delta^{|\mathcal{M}|-1}$ denotes the probability simplex over modalities. CP explicitly prevents dominant modalities from overwhelming sparse tactile signals, and supports incremental addition of new modalities without full retraining.
+ 
+\paragraph{Cross-Modal Attention Fusion (CMA).}
+CMA is built on a \textbf{Mixture of Transformers (MoT)} design~\citep{bao2023mot}, assigning each modality $m \in \{v, \tau, p\}$ a dedicated Transformer stream. Let $\mathbf{X}_m^{(\ell)} \in \mathbb{R}^{n_m \times d}$ denote the token sequence of modality $m$ at layer $\ell$. Each stream applies its own self-attention and feed-forward network:
+\begin{equation}
+    \tilde{\mathbf{X}}_m^{(\ell)}
+    = \mathrm{FFN}_m\!\left(\mathrm{SelfAttn}_m\!\left(
+    \mathbf{X}_m^{(\ell)}\right)\right).
+\end{equation}
+At every $S$-th layer, cross-modal attention gates allow controlled information exchange. Visual tokens attend to tactile keys and values:
+\begin{equation}
+    \mathbf{X}_v^{(\ell+1)}
+    = \tilde{\mathbf{X}}_v^{(\ell)}
+    + \mathrm{CrossAttn}\!\left(
+        \mathbf{Q} = \tilde{\mathbf{X}}_v^{(\ell)},\;
+        \mathbf{K} = \tilde{\mathbf{X}}_\tau^{(\ell)},\;
+        \mathbf{V} = \tilde{\mathbf{X}}_\tau^{(\ell)}
+    \right),
+\end{equation}
+with a symmetric gate applied in the opposite direction. After $L$ layers, representations from all streams are pooled and passed to the policy head:
+\begin{equation}
+    \mathbf{z}_t^{\mathrm{MoT}} =
+    \bigl[\mathrm{Pool}(\mathbf{X}_v^{(L)}) \;\|\;
+    \mathrm{Pool}(\mathbf{X}_\tau^{(L)}) \;\|\; \mathbf{e}_p\bigr],
+    \quad \mathbf{a}_t = \pi_\theta\!\left(\mathbf{z}_t^{\mathrm{MoT}}\right).
+\end{equation}
+By keeping modality-specific streams intact while injecting selective cross-modal signals only at periodic layers, CMA avoids the modality collapse observed in early fusion and retains the flexibility to up-weight tactile information in occlusion-dominant or force-critical scenarios.
+
+\section{Reachability Gain: Full Protocol}
+\label{app:reachability}
+ 
+To evaluate whether a world model can serve as an effective planning substrate, we measure the absolute performance gain achieved by optimizing a policy via world-model rollouts versus operating entirely unassisted.
+ 
+\paragraph{Step 1: Unassisted Baseline.}
+We roll out a pre-trained policy directly in the true environment and record its unassisted success rate $S_{\text{base}}$.
+ 
+\paragraph{Step 2: World-Model-Guided Optimization.}
+At each execution step, the pre-trained policy serves as a proposal distribution from which we sample $M=16$ candidate action sequences $\{\mathbf{a}_{t:t+H}^{(i)}\}_{i=1}^M$ over planning horizon $H$. Each sequence is rolled out through the action-conditioned world model $\mathcal{W}^{\text{cond}}$ to predict a final observation $\hat{\mathbf{v}}_{t+H}^{(i)}$. Given a pre-defined goal image $\mathbf{v}^*$, we select the sequence minimizing MSE to the goal:
+\begin{equation}
+    i^* = \arg\min_{i} \left\| \hat{\mathbf{v}}_{t+H}^{(i)} - \mathbf{v}^* \right\|_2^2.
+\end{equation}
+The first action of the selected sequence, $\mathbf{a}_t^{(i^*)}$, is executed in the true environment. This closed-loop optimization repeats across the entire episode, yielding an optimized success rate $S_{\text{opt}}$.
+ 
+\paragraph{Step 3: Reachability Gain.}
+\begin{equation}
+    \mathcal{R} = S_{\text{opt}} - S_{\text{base}}.
+\end{equation}
+A world model with physically inconsistent or drifting dynamics produces inaccurate predictions, leading to sub-optimal action selection and low or negative $\mathcal{R}$. A high $\mathcal{R}$ confirms that the imagined dynamics are accurate enough to consistently refine policy execution.
+
+\end{document}

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Tac-Bench: Benchmarking Diverse Tactile Manipulation and Multimodal World Models. Accepted at the RSS 2026 Workshop on Tactile Sensing for Robotic Foundation Models."
+    />
+    <title>Tac-Bench</title>
+    <link rel="stylesheet" href="static/css/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top">Tac-Bench</a>
+      <nav aria-label="Main navigation">
+        <a href="#overview">Overview</a>
+        <a href="#video">Video</a>
+        <a href="#tasks">Tasks</a>
+        <a href="#method">Method</a>
+        <a href="#world-models">World Models</a>
+        <a href="#paper">Paper</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <a class="venue" href="https://tac-for-fm.github.io/rss2026/">
+            Accepted at the RSS 2026 Workshop on Tactile Sensing for Robotic Foundation Models
+          </a>
+          <h1>Tac-Bench</h1>
+          <p class="subtitle">
+            Benchmarking Diverse Tactile Manipulation and Multimodal World Models
+          </p>
+          <p class="authors">Author names omitted for anonymous review.</p>
+          <div class="actions" aria-label="Project links">
+            <a class="button primary" href="paper/corl_2026_template_submission/example.pdf">Paper</a>
+            <a class="button" href="paper/corl_2026_template_submission/example.tex">LaTeX</a>
+            <a class="button" href="#bibtex">BibTeX</a>
+          </div>
+        </div>
+        <div class="hero-media" id="video">
+          <video controls playsinline preload="metadata" poster="static/assets/video/tac-bench-poster.jpg">
+            <source src="static/assets/video/tac-bench-project-video.mp4" type="video/mp4" />
+          </video>
+          <p class="media-caption">Tac-Bench project video · 2:57</p>
+        </div>
+      </section>
+
+      <section class="section compact" id="overview">
+        <div class="container">
+          <h2>Overview</h2>
+          <p class="lead">
+            Tac-Bench is a simulation benchmark for controlled and reproducible
+            evaluation of tactile manipulation and multimodal world models. It
+            controls task, sensor, data, and architecture choices so that gains
+            from touch can be measured rather than confounded.
+          </p>
+          <div class="stat-grid">
+            <div>
+              <strong>14</strong>
+              <span>contact-rich tasks</span>
+            </div>
+            <div>
+              <strong>3</strong>
+              <span>tactile sensor types</span>
+            </div>
+            <div>
+              <strong>3</strong>
+              <span>policy fusion architectures</span>
+            </div>
+            <div>
+              <strong>2</strong>
+              <span>physics-aware world-model probes</span>
+            </div>
+          </div>
+          <div class="figure-panel">
+            <img src="static/assets/figures/teaser.png" alt="Tac-Bench task and sensor overview" />
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="tasks">
+        <div class="container">
+          <div class="section-heading">
+            <h2>Task Suite</h2>
+            <p>
+              Fourteen contact-rich tasks span pick-and-place, insertion,
+              assembly, classification, visual occlusion, in-hand orientation,
+              and door manipulation.
+            </p>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="Task categories">
+            <button class="tab active" data-filter="all" type="button">All</button>
+            <button class="tab" data-filter="insertion" type="button">Insertion</button>
+            <button class="tab" data-filter="assembly" type="button">Assembly</button>
+            <button class="tab" data-filter="occlusion" type="button">Occlusion</button>
+            <button class="tab" data-filter="dexterity" type="button">Pick &amp; Reorient</button>
+            <button class="tab" data-filter="door" type="button">Doors</button>
+          </div>
+
+          <div class="video-grid task-grid">
+            <article class="video-card" data-category="insertion">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/pih_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Peg Insertion</h3>
+            </article>
+            <article class="video-card" data-category="insertion">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/usb_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>USB Insertion</h3>
+            </article>
+            <article class="video-card" data-category="insertion">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/plug_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Plug Insertion</h3>
+            </article>
+            <article class="video-card" data-category="assembly">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/gear_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Gear Assembly</h3>
+            </article>
+            <article class="video-card" data-category="assembly">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/nutbolt_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Nut-Bolt Screwing</h3>
+            </article>
+            <article class="video-card" data-category="assembly">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/bulb_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Bulb Assembly</h3>
+            </article>
+            <article class="video-card" data-category="occlusion">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/explore_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Object Search</h3>
+            </article>
+            <article class="video-card" data-category="occlusion">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/blind_insert_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Peg Reorientation</h3>
+            </article>
+            <article class="video-card" data-category="dexterity">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/sorting_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Ball Classification</h3>
+            </article>
+            <article class="video-card" data-category="dexterity">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/test_tube_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Test Tube Arrangement</h3>
+            </article>
+            <article class="video-card" data-category="dexterity">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/stack_cube_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Stack Cube</h3>
+            </article>
+            <article class="video-card" data-category="door">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/cabinet_hinge_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Hinge Door</h3>
+            </article>
+            <article class="video-card" data-category="door">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/cabinet_drawer_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Drawer</h3>
+            </article>
+            <article class="video-card" data-category="door">
+              <video controls muted loop playsinline>
+                <source src="source/tasks/cabinet_sliding_front_trajectory.mp4" type="video/mp4" />
+              </video>
+              <h3>Sliding Door</h3>
+            </article>
+          </div>
+
+          <div class="figure-panel task-overview">
+            <img src="static/assets/figures/tasks.png" alt="The fourteen Tac-Bench tasks grouped by skill class" />
+          </div>
+
+          <div class="sensor-row">
+            <figure>
+              <img src="paper/imgs/robot_renders/tacsltaskballsorting/front_1024.png" alt="Franka ball-classification task front camera render" />
+              <figcaption>Front RGB</figcaption>
+            </figure>
+            <figure>
+              <img src="paper/imgs/robot_renders_gsmini/tacsltaskballsorting/left_tactile_camera_taxim_1024.png" alt="GelSight Mini tactile render" />
+              <figcaption>GelSight Mini</figcaption>
+            </figure>
+            <figure>
+              <img src="paper/imgs/robot_renders_force_field/tacsltaskballsorting/tactile_force_field_right_1024.png" alt="FlexiTac force-field tactile render" />
+              <figcaption>FlexiTac</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted" id="method">
+        <div class="container">
+          <div class="section-heading">
+            <h2>Policy Architectures</h2>
+            <p>
+              Tac-Bench controls task data and unimodal encoders while comparing
+              Early Fusion, Compositional Policy, and Cross-Modal Attention.
+            </p>
+          </div>
+          <div class="split">
+            <div class="figure-panel">
+              <img src="static/assets/figures/architecture.png" alt="Policy architecture comparison figure" />
+            </div>
+            <div class="video-card wide">
+              <video controls muted loop playsinline>
+                <source src="source/methods/Policy%20Architectures.mov" type="video/quicktime" />
+              </video>
+              <h3>Policy Architecture Walkthrough</h3>
+              <p>
+                Visual and tactile streams are held fixed while the fusion module
+                changes, isolating how multimodal structure affects downstream control.
+              </p>
+            </div>
+          </div>
+          <div class="results-table" role="table" aria-label="Policy success rates">
+            <div role="row" class="table-head">
+              <span>Task</span><span>EF-DiT</span><span>EF-UNet</span><span>CP</span><span>CMA</span>
+            </div>
+            <div role="row"><span>Peg Insertion</span><span>0.12</span><span>0.06</span><span>0.14</span><span>0.10</span></div>
+            <div role="row"><span>USB Insertion</span><span>0.22</span><span>0.06</span><span>0.08</span><span>0.08</span></div>
+            <div role="row"><span>Plug Insertion</span><span>0.18</span><span>0.10</span><span>0.14</span><span>0.10</span></div>
+            <div role="row"><span>Ball Classification</span><span>0.66</span><span>0.74</span><span>0.82</span><span>0.68</span></div>
+            <div role="row"><span>Gear Assembly</span><span>0.10</span><span>0.02</span><span>0.06</span><span>0.04</span></div>
+            <div role="row"><span>Bulb Assembly</span><span>0.04</span><span>0.04</span><span>0.02</span><span>0.06</span></div>
+            <div role="row"><span>Nut &amp; Bolt</span><span>0.22</span><span>0.16</span><span>0.28</span><span>0.06</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="world-models">
+        <div class="container">
+          <div class="section-heading">
+            <h2>World-Model Evaluation</h2>
+            <p>
+              Video-fidelity metrics are paired with two functional probes:
+              Closed-Loop Rollout Success (CLRS) and Reachability Gain.
+            </p>
+          </div>
+
+          <div class="split">
+            <div class="video-card wide">
+              <video controls muted loop playsinline>
+                <source src="source/methods/Evaluation%20Protocols.mov" type="video/quicktime" />
+              </video>
+              <h3>Evaluation Protocols</h3>
+              <p>
+                Imagined visuo-tactile futures are evaluated by whether they can
+                drive inverse dynamics and model-predictive optimization.
+              </p>
+            </div>
+            <div class="metric-summary">
+              <h3>Beyond visual fidelity</h3>
+              <p><strong>CLRS</strong> decodes actions from imagined goals and executes them in simulation, testing whether generated futures are physically reachable.</p>
+              <p><strong>Reachability Gain</strong> measures whether model-predictive optimization improves an unassisted policy.</p>
+            </div>
+          </div>
+
+          <h3 class="subhead">Closed-loop rollout examples</h3>
+          <div class="comparison-grid">
+            <article class="comparison">
+              <h4>USB</h4>
+              <div>
+                <video controls muted loop playsinline>
+                  <source src="source/inverse/usb/wm_front_env0_success1_score1.000.mp4" type="video/mp4" />
+                </video>
+                <video controls muted loop playsinline>
+                  <source src="source/inverse/usb/rollout_front_1024_env0_success1_score1.000.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <p>World-model target and executed rollout.</p>
+            </article>
+            <article class="comparison">
+              <h4>Peg</h4>
+              <div>
+                <video controls muted loop playsinline>
+                  <source src="source/inverse/pih/wm_front_env0_success1_score1.000.mp4" type="video/mp4" />
+                </video>
+                <video controls muted loop playsinline>
+                  <source src="source/inverse/pih/rollout_front_1024_env0_success1_score1.000.mp4" type="video/mp4" />
+                </video>
+              </div>
+              <p>Generated visual goal and simulator execution.</p>
+            </article>
+          </div>
+
+          <h3 class="subhead">Action-conditioned reachability</h3>
+          <div class="video-grid three">
+            <article class="video-card">
+              <video controls muted loop playsinline>
+                <source src="source/action_condition/usb_seed10005_before_fail.mp4" type="video/mp4" />
+              </video>
+              <h3>Before Optimization</h3>
+            </article>
+            <article class="video-card">
+              <video controls muted loop playsinline>
+                <source src="source/action_condition/usb_seed10005_after_success.mp4" type="video/mp4" />
+              </video>
+              <h3>After Optimization</h3>
+            </article>
+            <article class="video-card">
+              <video controls muted loop playsinline>
+                <source src="source/action_condition/usb_seed10005_before_after_comparison.mp4" type="video/mp4" />
+              </video>
+              <h3>Side-by-Side</h3>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section muted" id="paper">
+        <div class="container narrow">
+          <h2>Paper</h2>
+          <p class="lead">
+            The complete CoRL 2026 submission manuscript and source are included
+            with this repository.
+          </p>
+          <div class="paper-preview">
+            <a href="paper/corl_2026_template_submission/example.pdf"><img src="static/assets/figures/paper-page-1.png" alt="First page of the Tac-Bench paper" /></a>
+            <a href="paper/corl_2026_template_submission/example.pdf#page=6"><img src="static/assets/figures/paper-page-6.png" alt="Benchmark results page of the Tac-Bench paper" /></a>
+          </div>
+          <pre id="bibtex"><code>@article{anonymous2026tacbench,
+  title={Tac-Bench: Benchmarking Diverse Tactile Manipulation and Multimodal World Models},
+  author={Anonymous},
+  year={2026}
+}</code></pre>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Website structure inspired by the Structured 4D and ContactWorld project pages.
+      </p>
+    </footer>
+
+    <script src="static/js/main.js"></script>
+  </body>
+</html>
