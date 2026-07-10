@@ -388,6 +388,10 @@ h2 {
   align-items: start;
 }
 
+.split.media-stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .results-table {
   margin-top: 24px;
   overflow-x: auto;
