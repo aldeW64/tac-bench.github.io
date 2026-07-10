@@ -309,6 +309,10 @@ h2 {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.video-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .video-card {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -537,6 +541,7 @@ footer {
   .hero-strip,
   .video-grid,
   .video-grid.three,
+  .video-grid.two,
   .stat-grid,
   .sensor-row,
   .comparison-grid,
