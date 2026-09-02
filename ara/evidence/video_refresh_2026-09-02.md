@@ -11,3 +11,6 @@
 - The follow-up website check validated 14 task cards, posters, manifest entries,
   checksums, expected video encoding, and full MP4 decode via
   `scripts/verify_task_assets.py --decode`.
+- A later layout revision removed task-card provenance and the redundant three-view
+  task example, replaced the two method videos with their final full frames, and
+  upgraded reachability media from 256×256 front views to 1024×256 multi-view videos.

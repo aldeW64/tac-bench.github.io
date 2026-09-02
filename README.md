@@ -31,8 +31,8 @@ evidence source. `source/tasks/manifest.json` records the source store,
 episode, seed, success step, layout, and checksum for each asset.
 
 Each task card uses a lightweight poster and loads its MP4 only near the
-viewport or on interaction. Its expandable **Replay provenance** row reads the
-capture record from the manifest without exposing machine-local source paths.
+viewport or on interaction. The machine-readable capture record remains in
+`source/tasks/manifest.json` for asset validation and regeneration.
 
 Validate the task-card assets locally (the same check runs in GitHub Actions):
 

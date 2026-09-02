@@ -66,3 +66,32 @@ tree:
     evidence: ["User instruction: 提交"]
     status: resolved
     also_depends_on: [N06]
+  - id: N08
+    type: decision
+    title: Simplify task and method presentation
+    provenance: user
+    timestamp: "2026-09-02T05:38"
+    choice: "Remove task provenance and sensor examples; use final method frames, explain three fusion architectures, and replace low-resolution reachability views."
+    alternatives: ["Keep the prior provenance-heavy cards, method videos, and 256×256 reachability views"]
+    evidence: ["User direction in this turn"]
+    status: resolved
+    also_depends_on: [N07]
+  - id: N09
+    type: experiment
+    title: Validate simplified media presentation
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:38"
+    result: "The validator passed 14 task cards, method figures, and 1024×256 reachability media; JavaScript syntax and diff checks also passed."
+    evidence: ["scripts/verify_task_assets.py --decode"]
+    status: resolved
+    also_depends_on: [N08]
+  - id: N10
+    type: decision
+    title: Publish completed website changes by default
+    provenance: user
+    timestamp: "2026-09-02T05:43"
+    choice: "Commit and push completed, validated website work after each future request."
+    alternatives: ["Leave completed work uncommitted pending a separate request"]
+    evidence: ["User instruction: 完成之后总是提交到Github"]
+    status: resolved
+    also_depends_on: [N09]

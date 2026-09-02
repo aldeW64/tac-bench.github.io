@@ -1,8 +1,8 @@
 sessions:
   - id: "2026-09-02_001"
     date: "2026-09-02"
-    summary: "Refreshed and enriched all 14 paper-task website videos with provenance and automated validation."
-    turn_count: 3
-    events_count: 7
+    summary: "Refreshed task videos and simplified the website media presentation with automated validation."
+    turn_count: 5
+    events_count: 10
     claims_touched: []
     open_threads: 0

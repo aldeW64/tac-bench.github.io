@@ -55,8 +55,9 @@ def main() -> int:
     args = parser.parse_args()
     root = pathlib.Path(__file__).resolve().parents[1]
     manifest = json.loads((root / "source/tasks/manifest.json").read_text())
+    page = (root / "index.html").read_text()
     html = TaskCardParser()
-    html.feed((root / "index.html").read_text())
+    html.feed(page)
     entries = {entry["website_task"]: entry for entry in manifest["entries"]}
     assert manifest["task_count"] == 14 == len(entries), "expected 14 unique manifest entries"
     assert set(html.cards) == set(entries), "task cards and manifest have different task ids"
@@ -76,7 +77,28 @@ def main() -> int:
         assert probe(video) == expected_probe, f"unexpected encoding: {video}"
         if args.decode:
             subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-f", "null", "-"], check=True)
-    print(f"validated {len(entries)} task cards, videos, posters, and manifest entries")
+
+    required_static = (
+        "static/assets/figures/policy-architectures-final.png",
+        "static/assets/figures/evaluation-protocols-final.png",
+    )
+    for asset in required_static:
+        assert asset in page and (root / asset).is_file(), f"missing static method figure: {asset}"
+    required_reachability = (
+        "source/action_condition/usb_seed10005_before_fail.mp4",
+        "source/action_condition/usb_seed10005_after_success.mp4",
+    )
+    for asset in required_reachability:
+        assert asset in page, f"page does not reference high-resolution reachability asset: {asset}"
+        stream = probe(root / asset)
+        assert int(stream["width"]) >= 1024, f"reachability asset is not high resolution: {asset}"
+    obsolete = (
+        "task-provenance", "sensor-row", "policy-architectures.mp4",
+        "evaluation-protocols.mp4", "usb_seed10005_before_front.mp4",
+        "usb_seed10005_after_front.mp4",
+    )
+    assert not any(token in page for token in obsolete), "obsolete task or method media remains in the page"
+    print(f"validated {len(entries)} task cards, method figures, and reachability media")
     return 0
 
 
