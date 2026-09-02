@@ -14,3 +14,7 @@
 - A later layout revision removed task-card provenance and the redundant three-view
   task example, replaced the two method videos with their final full frames, and
   upgraded reachability media from 256×256 front views to 1024×256 multi-view videos.
+- A follow-up search found no matching high-resolution Front-view reachability
+  trajectories in the website repository or the adjacent benchmark project. The
+  page therefore uses the two correct 256×256 Front-view videos rather than
+  mislabeling the 1024×256 multi-view composites as Front views.

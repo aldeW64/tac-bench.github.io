@@ -95,3 +95,23 @@ tree:
     evidence: ["User instruction: 完成之后总是提交到Github"]
     status: resolved
     also_depends_on: [N09]
+  - id: N11
+    type: decision
+    title: Restore policy result table and require Front-view reachability media
+    provenance: user
+    timestamp: "2026-09-02T05:48"
+    choice: "Restore the Policy Architectures experiment results and use Front-view reachability videos only."
+    alternatives: ["Keep the table omitted and use high-resolution multi-view composites"]
+    evidence: ["User corrections in this turn"]
+    status: resolved
+    also_depends_on: [N10]
+  - id: N12
+    type: dead_end
+    title: Locate high-resolution Front reachability videos
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:48"
+    hypothesis: "The website or adjacent benchmark project contains matching high-resolution Front trajectories for the USB before/after reachability example."
+    failure_mode: "Only 256×256 Front videos and 1024×256 multi-view composites were found; no matching high-resolution Front source or reproducible checkpoint was present."
+    lesson: "Do not relabel a multi-view composite as a Front view; retain the semantically correct Front clips until a high-resolution source is supplied or recaptured."
+    status: resolved
+    also_depends_on: [N11]

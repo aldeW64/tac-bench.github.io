@@ -2,7 +2,7 @@ sessions:
   - id: "2026-09-02_001"
     date: "2026-09-02"
     summary: "Refreshed task videos and simplified the website media presentation with automated validation."
-    turn_count: 5
-    events_count: 10
+    turn_count: 6
+    events_count: 12
     claims_touched: []
     open_threads: 0

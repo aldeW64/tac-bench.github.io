@@ -16,3 +16,6 @@ entries:
   - turn: "2026-09-02_001#5"
     notes:
       - "Recorded the user's standing publication preference as a decision; it governs future completed website changes while preserving scoped staging safeguards."
+  - turn: "2026-09-02_001#6"
+    notes:
+      - "Recorded the source search as a dead end because the requested high-resolution Front media was absent; did not treat the multi-view composite as a semantic substitute."
