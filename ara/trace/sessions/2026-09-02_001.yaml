@@ -2,8 +2,8 @@ session:
   id: "2026-09-02_001"
   date: "2026-09-02"
   started: "2026-09-02T05:16"
-  last_turn: "2026-09-02T05:24"
-  turn_count: 2
+  last_turn: "2026-09-02T05:29"
+  turn_count: 3
   summary: "Refreshed and enriched all 14 paper-task website videos with provenance and automated validation."
 
 events_logged:
@@ -43,6 +43,12 @@ events_logged:
     routing: direct
     provenance: ai-executed
     summary: "Validated task cards, posters, provenance linkage, and video integrity."
+  - turn: 3
+    type: decision
+    id: N07
+    routing: direct
+    provenance: user
+    summary: "Authorized scoped commit and push to main."
 
 ai_actions:
   - turn: 1
@@ -53,6 +59,10 @@ ai_actions:
     action: "Added task goals and success criteria, lazy video loading, expandable provenance, posters, a validator, and a GitHub Actions workflow."
     provenance: ai-executed
     files_changed: ["index.html", "static/css/style.css", "static/js/main.js", "scripts/verify_task_assets.py", ".github/workflows/task-assets.yml", "source/tasks/posters/*.jpg"]
+  - turn: 3
+    action: "Committed and pushed validated scoped website changes as f532f15 to origin/main."
+    provenance: ai-executed
+    files_changed: []
 
 claims_touched: []
 logic_revisions: []
@@ -61,5 +71,7 @@ key_context:
     excerpt: "User requested implementation of the previously agreed plan."
   - turn: 2
     excerpt: "User requested implementation of all improvement recommendations."
+  - turn: 3
+    excerpt: "User requested commit."
 open_threads: []
 ai_suggestions_pending: []

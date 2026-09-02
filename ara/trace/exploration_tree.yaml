@@ -56,3 +56,13 @@ tree:
     evidence: ["evidence/video_refresh_2026-09-02.md", "scripts/verify_task_assets.py --decode"]
     status: resolved
     also_depends_on: [N05]
+  - id: N07
+    type: decision
+    title: Publish the validated website update
+    provenance: user
+    timestamp: "2026-09-02T05:29"
+    choice: "Commit and push the scoped task-video and website improvements to main."
+    alternatives: ["Leave validated changes only in the local worktree"]
+    evidence: ["User instruction: 提交"]
+    status: resolved
+    also_depends_on: [N06]

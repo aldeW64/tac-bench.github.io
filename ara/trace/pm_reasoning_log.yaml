@@ -7,3 +7,6 @@ entries:
     notes:
       - "Routed the user's request as a decision and the complete validation run as an experiment."
       - "Did not stage a claim: the work is a website implementation and integrity check, not evidence for a benchmark-performance conclusion."
+  - turn: "2026-09-02_001#3"
+    notes:
+      - "Routed the explicit publication authorization as a decision; publication details remain an AI action in the session record."
