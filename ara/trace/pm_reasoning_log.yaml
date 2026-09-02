@@ -1,0 +1,9 @@
+entries:
+  - turn: "2026-09-02_001#1"
+    notes:
+      - "Routed user authorization as a decision and capture/validation results as journey facts."
+      - "Did not stage a generalized claim: this turn establishes asset provenance and validation, not a research conclusion."
+  - turn: "2026-09-02_001#2"
+    notes:
+      - "Routed the user's request as a decision and the complete validation run as an experiment."
+      - "Did not stage a claim: the work is a website implementation and integrity check, not evidence for a benchmark-performance conclusion."

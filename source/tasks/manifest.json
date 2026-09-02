@@ -1,0 +1,414 @@
+{
+  "capture_tool": "scripts/capture_task_videos.py",
+  "entries": [
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 1,
+        "frames": 335,
+        "seed": 400001,
+        "source_end_exclusive": 656,
+        "source_start": 336,
+        "success_step": 320
+      },
+      "codec": "h264",
+      "config": "isaacgym_config",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "84492cfa84f37ae231022930e99ed822f8cd8538bc9c8b24524c4bd4a16bee9a",
+      "source_store": "/data/hf_cache/manifeel/data/pih.zarr",
+      "store_task": "pih",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "pih",
+      "website_video": "pih_front_trajectory.mp4",
+      "poster": "posters/pih.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 1,
+        "frames": 120,
+        "seed": 400001,
+        "source_end_exclusive": 361,
+        "source_start": 245,
+        "success_step": 105
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_usb",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "ebe4ae367b171da6e8149c1c62c3c81502a9424505ef16af607bd4f5b6ad8f7e",
+      "source_store": "/data/hf_cache/manifeel/data/usb.zarr",
+      "store_task": "usb",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "usb",
+      "website_video": "usb_front_trajectory.mp4",
+      "poster": "posters/usb.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 2,
+        "frames": 89,
+        "seed": 400002,
+        "source_end_exclusive": 350,
+        "source_start": 276,
+        "success_step": 74
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_power_plug",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "7cf4755d0891993a81b4e102fdfeee55f64c44780a6f57f6e66d5da71f3d3599",
+      "source_store": "/data/hf_cache/manifeel/data/plug.zarr",
+      "store_task": "plug",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "plug",
+      "website_video": "plug_front_trajectory.mp4",
+      "poster": "posters/plug.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 2,
+        "frames": 114,
+        "seed": 400001,
+        "source_end_exclusive": 517,
+        "source_start": 416,
+        "success_step": 99
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_gear",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "9eaba7129d65cb806f2b7647ab88b2831f2c7e89aedd61a2e77295a34ff1e1ff",
+      "source_store": "/data/hf_cache/manifeel/data/gear.zarr",
+      "store_task": "gear",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "gear",
+      "website_video": "gear_front_trajectory.mp4",
+      "poster": "posters/gear.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 468,
+        "seed": 400000,
+        "source_end_exclusive": 453,
+        "source_start": 0,
+        "success_step": 453
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_nut",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "2d2fade91650226536c204b8a5ea50d42047d16a52c13e2c0bb6ff96f7ee8122",
+      "source_store": "/data/hf_cache/manifeel/data/nutbolt.zarr",
+      "store_task": "nutbolt",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "nutbolt",
+      "website_video": "nutbolt_front_trajectory.mp4",
+      "poster": "posters/nutbolt.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 3,
+        "frames": 429,
+        "seed": 400001,
+        "source_end_exclusive": 1801,
+        "source_start": 1387,
+        "success_step": 414
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_bulb",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "daf882ff788d6b8b2109a4cc5245416798c68520e9d7e5a83efe5fcb55329b78",
+      "source_store": "/data/hf_cache/manifeel/data/bulb.zarr",
+      "store_task": "bulb",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "bulb",
+      "website_video": "bulb_front_trajectory.mp4",
+      "poster": "posters/bulb.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 195,
+        "seed": 300000,
+        "source_end_exclusive": 180,
+        "source_start": 0,
+        "success_step": 180
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_object_search",
+      "fps": 15,
+      "height": 1024,
+      "layout": "wrist-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "38aef75d2d085bfcbd4746e0f52b19235ad211cd43f73c3b5300465a1fd0efa5",
+      "source_store": "/data/hf_cache/manifeel/data/object_search.zarr",
+      "store_task": "object_search",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "explore",
+      "website_video": "explore_front_trajectory.mp4",
+      "poster": "posters/explore.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 187,
+        "seed": 100005,
+        "source_end_exclusive": 172,
+        "source_start": 0,
+        "success_step": 172
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_peg_reorientation",
+      "fps": 15,
+      "height": 1024,
+      "layout": "wrist-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "f9d0271185129ff3c1b3c8ef0301b7c44e45a0116645ba0ab711e44c74f92435",
+      "source_store": "/data/hf_cache/manifeel/data/peg_reorientation.zarr",
+      "store_task": "peg_reorientation",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "blind_insert",
+      "website_video": "blind_insert_front_trajectory.mp4",
+      "poster": "posters/blind_insert.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 133,
+        "seed": 400000,
+        "source_end_exclusive": 118,
+        "source_start": 0,
+        "success_step": 118
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_ball_sorting",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "c67735246c0719b81ca381594da58663786db4ef8e6969e631a847ce740f8759",
+      "source_store": "/data/hf_cache/manifeel/data/sorting.zarr",
+      "store_task": "sorting",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "sorting",
+      "website_video": "sorting_front_trajectory.mp4",
+      "poster": "posters/sorting.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 248,
+        "seed": 10001,
+        "source_end_exclusive": 233,
+        "source_start": 0,
+        "success_step": 233
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_test_tube",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "57b01b67a353748af768c55651d2977865b47694027db2ea14f5b8a68d5c714c",
+      "source_store": "/data/hf_cache/manifeel/data/test_tube.zarr",
+      "store_task": "test_tube",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "test_tube",
+      "website_video": "test_tube_front_trajectory.mp4",
+      "poster": "posters/test_tube.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": null,
+      "capture": {
+        "episode": 0,
+        "frames": 232,
+        "seed": 100000,
+        "source_end_exclusive": 217,
+        "source_start": 0,
+        "success_step": 217
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_stack_cube",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "053d28aa5ea7ac11a1a3fed5e204d9596f2e218c41cfeba0672a242395960b21",
+      "source_store": "/data/hf_cache/manifeel/data/stack_cube.zarr",
+      "store_task": "stack_cube",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "stack_cube",
+      "website_video": "stack_cube_front_trajectory.mp4",
+      "poster": "posters/stack_cube.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": "hinge_door",
+      "capture": {
+        "episode": 0,
+        "frames": 219,
+        "seed": 730000,
+        "source_end_exclusive": 204,
+        "source_start": 0,
+        "success_step": 204
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_cabinet",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "1879452b45de04a517c2753025a383f800502d0c51fff2f8d4a18fca9c449839",
+      "source_store": "/data/hf_cache/manifeel/data/hinge_door.zarr",
+      "store_task": "hinge_door",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "cabinet_hinge",
+      "website_video": "cabinet_hinge_front_trajectory.mp4",
+      "poster": "posters/cabinet_hinge.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": "drawer",
+      "capture": {
+        "episode": 4,
+        "frames": 326,
+        "seed": 620004,
+        "source_end_exclusive": 2179,
+        "source_start": 1744,
+        "success_step": 311
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_cabinet",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "2ff1e90163c64662fef2a9c8e5cb580020d46adad0e4b9577edf0e9b7c011531",
+      "source_store": "/data/hf_cache/manifeel/data/drawer.zarr",
+      "store_task": "drawer",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "cabinet_drawer",
+      "website_video": "cabinet_drawer_front_trajectory.mp4",
+      "poster": "posters/cabinet_drawer.jpg",
+      "width": 1536
+    },
+    {
+      "cabinet_subtask": "sliding_door",
+      "capture": {
+        "episode": 0,
+        "frames": 282,
+        "seed": 100000,
+        "source_end_exclusive": 267,
+        "source_start": 0,
+        "success_evidence": "success-only-store",
+        "success_step": 267
+      },
+      "codec": "h264",
+      "config": "isaacgym_config_cabinet",
+      "fps": 15,
+      "height": 1024,
+      "layout": "front-primary",
+      "pixel_format": "yuv420p",
+      "sha256": "9656f2425542fe6363404bbf96a31942712ba4801e9ef6c98dc4ce8ad21fd05b",
+      "source_store": "/data/hf_cache/manifeel/data/sliding_door.zarr",
+      "store_task": "sliding_door",
+      "views": [
+        "front",
+        "wrist",
+        "right_tactile_camera_taxim"
+      ],
+      "website_task": "cabinet_sliding",
+      "website_video": "cabinet_sliding_front_trajectory.mp4",
+      "poster": "posters/cabinet_sliding.jpg",
+      "width": 1536
+    }
+  ],
+  "format_version": 1,
+  "task_count": 14
+}

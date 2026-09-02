@@ -1,0 +1,8 @@
+sessions:
+  - id: "2026-09-02_001"
+    date: "2026-09-02"
+    summary: "Refreshed and enriched all 14 paper-task website videos with provenance and automated validation."
+    turn_count: 2
+    events_count: 6
+    claims_touched: []
+    open_threads: 0

@@ -1,0 +1,23 @@
+name: Task assets
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "source/tasks/**"
+      - "scripts/capture_task_videos.py"
+      - "scripts/verify_task_assets.py"
+  push:
+    paths:
+      - "index.html"
+      - "source/tasks/**"
+      - "scripts/capture_task_videos.py"
+      - "scripts/verify_task_assets.py"
+
+jobs:
+  verify-task-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify task videos and website references
+        run: python3 scripts/verify_task_assets.py --decode

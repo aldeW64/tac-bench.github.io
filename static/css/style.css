@@ -346,6 +346,40 @@ h2 {
   font-size: 0.95rem;
 }
 
+.task-card h3 {
+  margin-bottom: 7px;
+}
+
+.task-goal {
+  min-height: 5.2em;
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.task-goal strong {
+  color: var(--ink);
+}
+
+.task-provenance {
+  margin: 0 14px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.task-provenance summary {
+  padding-top: 10px;
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.task-provenance p {
+  margin: 8px 0 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
 .video-card.wide video {
   aspect-ratio: auto;
   object-fit: contain;

@@ -1,0 +1,58 @@
+tree:
+  - id: N01
+    type: decision
+    title: Implement paper-task video refresh
+    provenance: user
+    timestamp: "2026-09-02T05:16"
+    choice: "Implement the agreed 14-task, high-resolution three-panel video plan."
+    alternatives: ["Leave existing website MP4 assets unchanged"]
+    evidence: ["User instruction: Implement the plan"]
+    status: resolved
+    also_depends_on: []
+  - id: N02
+    type: experiment
+    title: Replay success-only trajectories in Isaac Gym
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:16"
+    result: "13 task videos reached the simulator success predicate during the full capture job."
+    evidence: ["evidence/video_refresh_2026-09-02.md", "Slurm job 10288510"]
+    status: resolved
+    also_depends_on: [N01]
+  - id: N03
+    type: dead_end
+    title: Deterministic Sliding Door replay candidates
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:16"
+    hypothesis: "The first 10 recorded Sliding Door action trajectories would reproduce simulator success."
+    failure_mode: "None of the 10 replay candidates triggered the simulator success predicate."
+    lesson: "Preserve explicit provenance and use only a metadata-verified success-only source fallback when replay cannot reproduce a trajectory."
+    status: resolved
+    also_depends_on: [N02]
+  - id: N04
+    type: experiment
+    title: Validate success-only source fallback and final website assets
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:16"
+    result: "Fallback completed on L40S; the final 14-video batch completed and passed encoding, decode, hash, and page-reference validation."
+    evidence: ["evidence/video_refresh_2026-09-02.md", "Slurm jobs 10288502 and 10288510"]
+    status: resolved
+    also_depends_on: [N03]
+  - id: N05
+    type: decision
+    title: Implement all website improvement recommendations
+    provenance: user
+    timestamp: "2026-09-02T05:24"
+    choice: "Add task explanations, lazy posters, provenance disclosure, and continuous validation."
+    alternatives: ["Retain video-only task cards and manual asset checks"]
+    evidence: ["User instruction: 实现所有改进意见"]
+    status: resolved
+    also_depends_on: [N04]
+  - id: N06
+    type: experiment
+    title: Validate enriched task-card delivery
+    provenance: ai-executed
+    timestamp: "2026-09-02T05:24"
+    result: "The asset validator passed all 14 cards, posters, manifest checksums, expected encoding, and MP4 decodes; JavaScript syntax validation also passed."
+    evidence: ["evidence/video_refresh_2026-09-02.md", "scripts/verify_task_assets.py --decode"]
+    status: resolved
+    also_depends_on: [N05]
