@@ -115,3 +115,13 @@ tree:
     lesson: "Do not relabel a multi-view composite as a Front view; retain the semantically correct Front clips until a high-resolution source is supplied or recaptured."
     status: resolved
     also_depends_on: [N11]
+  - id: N13
+    type: decision
+    title: Update paper link target
+    provenance: user
+    timestamp: "2026-09-03T22:33"
+    choice: "Point the homepage Paper button to the OpenReview discussion URL."
+    alternatives: ["Keep the local PDF link in hero"]
+    evidence: ["User instruction: paper link should go to openreview.net/forum?id=gCu1TvTLUm#discussion"]
+    status: resolved
+    also_depends_on: [N12]

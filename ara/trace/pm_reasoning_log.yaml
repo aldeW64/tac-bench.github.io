@@ -19,3 +19,7 @@ entries:
   - turn: "2026-09-02_001#6"
     notes:
       - "Recorded the source search as a dead end because the requested high-resolution Front media was absent; did not treat the multi-view composite as a semantic substitute."
+  - turn: "2026-09-03_001#1"
+    notes:
+      - "Recorded a user decision node for the Paper link target switch to OpenReview."
+      - "Logged the corresponding AI action as a site-level href update in index.html."

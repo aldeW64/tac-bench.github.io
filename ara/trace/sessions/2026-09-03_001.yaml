@@ -1,0 +1,31 @@
+session:
+  id: "2026-09-03_001"
+  date: "2026-09-03"
+  started: "2026-09-03T22:33"
+  last_turn: "2026-09-03T22:33"
+  turn_count: 1
+  summary: "Updated homepage paper link to OpenReview."
+
+events_logged:
+  - turn: 1
+    type: decision
+    id: N13
+    routing: direct
+    provenance: user
+    summary: "User requested Paper link route update to OpenReview discussion URL."
+
+ai_actions:
+  - turn: 1
+    action: "Updated the hero Paper button href to the OpenReview paper page."
+    provenance: ai-executed
+    files_changed: ["index.html"]
+
+claims_touched: []
+logic_revisions: []
+
+key_context:
+  - turn: 1
+    excerpt: "User requested that the paper link connect to https://openreview.net/forum?id=gCu1TvTLUm#discussion."
+
+open_threads: []
+ai_suggestions_pending: []
