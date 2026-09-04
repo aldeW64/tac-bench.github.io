@@ -119,7 +119,7 @@ p {
 
 h1 {
   margin-bottom: 12px;
-  font-size: clamp(3.4rem, 8.4vw, 8rem);
+  font-size: clamp(3rem, 7.8vw, 7.2rem);
   line-height: 0.92;
   letter-spacing: 0;
 }
