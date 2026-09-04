@@ -121,35 +121,57 @@ h1 {
   font-weight: 680;
 }
 
+.authors,
+.affiliations {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: baseline;
+}
+
 .authors {
-  color: var(--muted);
-  margin: 0 0 20px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 9px 18px;
-}
-
-.author-entry {
-  font-size: 0.94rem;
-  line-height: 1.5;
-}
-
-.author-name {
   color: var(--ink);
+  margin-bottom: 10px;
+}
+
+.authors li {
+  font-size: 0.98rem;
+  line-height: 1.45;
   font-weight: 650;
 }
 
-.author-entry a {
+.authors sup,
+.affiliations sup {
+  font-size: 0.75em;
+  margin-left: 3px;
+  color: var(--accent-dark);
+  font-weight: 750;
+}
+
+.affiliations {
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+.affiliations li {
+  font-size: 0.93rem;
+  line-height: 1.45;
+}
+
+.affiliations a {
   color: var(--accent-dark);
 }
 
-.author-entry a:hover {
+.affiliations a:hover {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.actions {
+.hero-links {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -582,10 +604,6 @@ footer {
   .stat-grid,
   .baseline-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .authors {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
