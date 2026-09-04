@@ -181,8 +181,9 @@ h1 {
 }
 
 .affiliation-logo {
-  width: 12px;
-  height: 12px;
+  width: auto;
+  height: 25px;
+  max-width: 26px;
   object-fit: contain;
   border-radius: 2px;
   vertical-align: middle;
