@@ -167,6 +167,12 @@ h1 {
 }
 
 .affiliations a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.affiliations a {
   color: var(--accent-dark);
 }
 
@@ -174,6 +180,13 @@ h1 {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.affiliation-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 3px;
 }
 
 .hero-links {
