@@ -97,9 +97,9 @@ nav a:hover {
 
 .venue {
   display: inline-block;
-  margin: 0 0 14px;
+  margin: 8px 0 6px;
   color: var(--accent);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -161,11 +161,11 @@ h1 {
 
 .authors {
   color: var(--ink);
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .authors li {
-  font-size: 0.98rem;
+  font-size: 1.02rem;
   line-height: 1.45;
   font-weight: 650;
 }
@@ -180,11 +180,11 @@ h1 {
 
 .affiliations {
   color: var(--muted);
-  margin-bottom: 22px;
+  margin-bottom: 10px;
 }
 
 .affiliations li {
-  font-size: 0.93rem;
+  font-size: 0.99rem;
   line-height: 1.45;
 }
 
