@@ -54,3 +54,18 @@ previewVideos.forEach((video) => {
   video.addEventListener("mouseenter", () => video.play());
   video.addEventListener("focus", () => video.play());
 });
+
+const heroVideo = document.getElementById("hero-project-video");
+const heroVideoMask = document.getElementById("hero-video-mask");
+
+if (heroVideo && heroVideoMask) {
+  const toggleHeroVideoMask = () => {
+    heroVideoMask.classList.toggle("active", heroVideo.currentTime < 16);
+  };
+
+  ["loadedmetadata", "timeupdate", "seeked", "play", "pause", "ended"].forEach((eventName) => {
+    heroVideo.addEventListener(eventName, toggleHeroVideoMask);
+  });
+
+  toggleHeroVideoMask();
+}

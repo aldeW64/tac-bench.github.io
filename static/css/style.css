@@ -123,7 +123,30 @@ h1 {
 
 .authors {
   color: var(--muted);
-  font-size: 1.02rem;
+  margin: 0 0 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px 18px;
+}
+
+.author-entry {
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.author-name {
+  color: var(--ink);
+  font-weight: 650;
+}
+
+.author-entry a {
+  color: var(--accent-dark);
+}
+
+.author-entry a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .actions {
@@ -154,6 +177,7 @@ h1 {
 
 .hero-media {
   min-width: 0;
+  position: relative;
 }
 
 .hero-media > video {
@@ -162,6 +186,24 @@ h1 {
   border-radius: 8px;
   background: #111;
   box-shadow: var(--shadow);
+}
+
+.hero-video-mask {
+  position: absolute;
+  top: 24px;
+  left: 8%;
+  width: 84%;
+  height: 56px;
+  border-radius: 8px;
+  background: #000;
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+
+.hero-video-mask.active {
+  display: block;
 }
 
 .media-caption {
@@ -540,6 +582,10 @@ footer {
   .stat-grid,
   .baseline-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .authors {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
