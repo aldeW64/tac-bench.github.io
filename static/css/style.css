@@ -181,10 +181,13 @@ h1 {
 }
 
 .affiliation-logo {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   object-fit: contain;
-  border-radius: 3px;
+  border-radius: 2px;
+  vertical-align: middle;
+  align-self: center;
+  margin-top: 1px;
 }
 
 .hero-links {
