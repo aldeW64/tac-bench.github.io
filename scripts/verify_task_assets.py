@@ -8,7 +8,9 @@ import hashlib
 import json
 import pathlib
 import subprocess
+import sys
 from html.parser import HTMLParser
+from shutil import which
 
 
 class TaskCardParser(HTMLParser):
@@ -49,10 +51,27 @@ def probe(video: pathlib.Path) -> dict[str, object]:
     return json.loads(raw)["streams"][0]
 
 
+def require_tools(*tools: str) -> None:
+    for tool in tools:
+        if not which(tool):
+            raise FileNotFoundError(
+                f"required executable '{tool}' is not installed. "
+                "Install ffmpeg (includes ffprobe), e.g. `apt-get install ffmpeg` "
+                "or `brew install ffmpeg`."
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--decode", action="store_true", help="Decode every MP4 as an additional integrity check.")
     args = parser.parse_args()
+    try:
+        require_tools("ffprobe")
+        if args.decode:
+            require_tools("ffmpeg")
+    except FileNotFoundError as error:
+        print(f"verification failed: {error}", file=sys.stderr)
+        return 2
     root = pathlib.Path(__file__).resolve().parents[1]
     manifest = json.loads((root / "source/tasks/manifest.json").read_text())
     page = (root / "index.html").read_text()
