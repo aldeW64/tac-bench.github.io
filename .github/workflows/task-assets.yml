@@ -19,5 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install ffmpeg tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - name: Verify task videos and website references
         run: python3 scripts/verify_task_assets.py --decode
